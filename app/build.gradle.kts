@@ -87,8 +87,25 @@ dependencies {
     implementation(libs.navigation3.ui)
     implementation(libs.lifecycle.viewmodel.navigation3)
     implementation(libs.serialization.json)
-
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.google.accompanist:accompanist-pager:0.34.0")
     implementation("com.google.accompanist:accompanist-pager-indicators:0.34.0")
+    // Retrofit
+    implementation("com.squareup.retrofit2:retrofit:3.0.0")
+    // Retrofit with Gson (JSON converter)
+    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
+
+    // OkHttp Logging Interceptor (for debugging API calls)
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    implementation("com.google.code.gson:gson:2.13.1")
+
+    // Preferences DataStore
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
+    implementation("com.google.guava:guava:33.4.8-android")
+
+    implementation("com.google.maps.android:maps-compose:6.12.1")
+    implementation("com.google.android.gms:play-services-maps:19.2.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("com.google.android.libraries.places:places:5.0.0")
 }
