@@ -9,6 +9,8 @@ import androidx.navigation3.ui.NavDisplay
 import com.raven.chaperone.ui.screens.onboarding.OnboardingPageScreen
 import com.raven.chaperone.ui.screens.onboarding.SplashScreen
 import com.raven.chaperone.ui.screens.onboarding.signin.SignInScreen
+import com.raven.chaperone.ui.screens.onboarding.signup.SignUpScreen
+import com.raven.chaperone.ui.screens.onboarding.WandererQuestionScreen
 
 @Composable
 fun AppNavDisplay() {
@@ -21,21 +23,39 @@ fun AppNavDisplay() {
         modifier = Modifier,
         entryProvider = entryProvider {
             entry<Screen.Splash> {
-                SplashScreen({ backstack.add(Screen.OnboardingPage(0)) })
+                SplashScreen { backstack.add(Screen.OnboardingPage(0)) }
             }
 
             entry<Screen.OnboardingPage> {
                 OnboardingPageScreen(it.page) {
                     if (it.page == 2) {
-                        backstack.add(Screen.SignIn)
+                        backstack.add(Screen.SignUp(0))
                     } else
                         backstack.add(Screen.OnboardingPage(it.page + 1))
-
                 }
+            }
+
+            entry<Screen.WandererQuestions> {
+                WandererQuestionScreen(onSubmitClick = {
+                    backstack.add(Screen.WandererQuestions(it.page+1))
+                })
             }
 
             entry<Screen.SignIn> {
                 SignInScreen(onSignInSuccess = {}, onNavigateToSignUp = {})
+            }
+
+            entry<Screen.SignUp> {
+                SignUpScreen(
+                    stage = it.stage,
+                    onNextClick = {
+                        if (it.stage < 2) {
+                            backstack.add(Screen.SignUp(it.stage + 1))
+                        } else {
+                            backstack.add(Screen.WandererQuestions(0))
+                        }
+                    }
+                )
             }
         }
     )
