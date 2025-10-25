@@ -32,12 +32,12 @@ import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialCustomException
 import androidx.credentials.exceptions.NoCredentialException
-import com.raven.chaperone.ui.theme.ChaperoneTheme
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
-import com.raven.chaperone.ui.navigation.AppNavDisplay
+import com.raven.chaperone.ui.navigation.wanderer.AppNavDisplay
+import com.raven.chaperone.ui.theme.ChaperoneTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -50,6 +50,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.security.SecureRandom
 import java.util.Base64
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
@@ -60,19 +61,21 @@ class MainActivity : ComponentActivity() {
         val webClientId = "599242703933-7b7qrros0e3v1m7hh9o53fgkg1s5bcip.apps.googleusercontent.com"
         setContent {
             ChaperoneTheme {
-//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//                    Column(
-//                        modifier = Modifier
-//                            .padding(innerPadding)
-//                            .fillMaxSize(),
-//                        verticalArrangement = Arrangement.Center,
-//                        horizontalAlignment = Alignment.CenterHorizontally
-//                    ) {
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    Column(
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
 //                        ButtonUI(webClientId)
-//
-//                    }
-//                }
-                AppNavDisplay()
+//                        SearchPageScreen()
+//                        MapSearchScreen()
+                        AppNavDisplay()
+                    }
+                }
+//                AppNavDisplay()
             }
         }
     }
