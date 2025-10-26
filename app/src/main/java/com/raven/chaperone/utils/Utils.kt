@@ -54,3 +54,11 @@ object Utils {
      * string. Store this function's result for multiple use cases.*/
     fun <T> Response<T>.error(): String? = this.errorBody()?.string()
 }
+
+
+fun convertToISODate(inputDate: String): String {
+    val inputFormatter = java.time.format.DateTimeFormatter.ofPattern("d/M/yyyy")
+    val outputFormatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val date = java.time.LocalDate.parse(inputDate, inputFormatter)
+    return date.format(outputFormatter)
+}
