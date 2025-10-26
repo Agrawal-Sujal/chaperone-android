@@ -61,19 +61,18 @@ class MainActivity : ComponentActivity() {
         val webClientId = "599242703933-7b7qrros0e3v1m7hh9o53fgkg1s5bcip.apps.googleusercontent.com"
         setContent {
             ChaperoneTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Column(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
 //                        ButtonUI(webClientId)
 //                        SearchPageScreen()
 //                        MapSearchScreen()
-                        AppNavDisplay()
-                    }
+                    AppNavDisplay()
+//                    }
                 }
 //                AppNavDisplay()
             }

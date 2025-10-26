@@ -8,5 +8,7 @@ sealed class Screen {
 
     data class SearchResult(val searchData: SearchData) : Screen()
 
-    data class WalkerInfo(val walkerProfileView: WalkerProfileView) : Screen()
+    data class WalkerInfo(val walkerProfileView: WalkerProfileView?,val walkerId: Int?) : Screen()
+
+    object WalksHomeScreen: Screen()
 }
