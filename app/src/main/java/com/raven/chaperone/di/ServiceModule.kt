@@ -1,6 +1,8 @@
 package com.raven.chaperone.di
 
 import com.raven.chaperone.data.local.appPref.AppPref
+import com.raven.chaperone.services.remote.AccountsServices
+import com.raven.chaperone.services.remote.SearchServices
 import com.raven.chaperone.utils.Constants
 import com.raven.chaperone.utils.HeaderInterceptor
 import dagger.Module
@@ -35,5 +37,17 @@ class ServiceModule {
             .baseUrl(Constants.CHAPERONE_BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+
+    @Singleton
+    @Provides
+    fun provideSearchServices(appPreferences: AppPref): SearchServices =
+        constructRetrofit(appPreferences)
+            .create(SearchServices::class.java)
+
+    @Singleton
+    @Provides
+    fun provideAccountsServices(appPreferences: AppPref): AccountsServices =
+        constructRetrofit(appPreferences)
+            .create(AccountsServices::class.java)
 
 }
