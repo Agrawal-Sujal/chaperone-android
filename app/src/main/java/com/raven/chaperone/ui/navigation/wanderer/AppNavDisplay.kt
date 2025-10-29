@@ -24,6 +24,7 @@ import com.raven.chaperone.ui.screens.commonComponents.maps.MapSearchScreen
 import com.raven.chaperone.ui.screens.wanderer.explore.search.SearchPageScreen
 import com.raven.chaperone.ui.screens.wanderer.explore.searchResult.SearchResultScreen
 import com.raven.chaperone.ui.screens.wanderer.explore.walkerProfile.WalkerInfoScreen
+import com.raven.chaperone.ui.screens.wanderer.home.HomeScreen
 import com.raven.chaperone.ui.screens.wanderer.walks.home.WalksHomeScreen
 import com.raven.chaperone.ui.theme.lightPurple
 import com.raven.chaperone.ui.theme.mediumPurple
@@ -31,7 +32,7 @@ import com.raven.chaperone.ui.theme.textPurple
 
 
 sealed class BottomNavItem(val screen: Screen, val label: String, val icon: ImageVector) {
-    data object Home : BottomNavItem(Screen.WalksHomeScreen, "Home", Icons.Default.Home)
+    data object Home : BottomNavItem(Screen.HomeScreen, "Home", Icons.Default.Home)
 
     data object Walks : BottomNavItem(Screen.WalksHomeScreen, "Walks", Icons.Default.DirectionsRun)
     data object Explore : BottomNavItem(Screen.ExplorePage(), "Explore", Icons.Default.Search)
@@ -43,7 +44,7 @@ fun AppNavDisplay() {
 
     val current = backstack.lastOrNull() ?: Screen.ExplorePage()
 
-    val showBottomNav = current is Screen.ExplorePage || current is Screen.WalksHomeScreen
+    val showBottomNav = current is Screen.ExplorePage || current is Screen.WalksHomeScreen || current is Screen.HomeScreen
 
     val bottomNavItems = listOf(
         BottomNavItem.Home,
@@ -127,6 +128,9 @@ fun AppNavDisplay() {
                     WalksHomeScreen(onNavigateToProfile = {
                         backstack.add(Screen.WalkerInfo(null, it))
                     })
+                }
+                entry<Screen.HomeScreen> {
+                    HomeScreen()
                 }
             }
         )

@@ -14,4 +14,6 @@ sealed class Screen {
     object WalksHomeScreen : Screen()
 
     data class MapScreen(val selectedLocation: LatLng?,val locationName: String?) : Screen()
+
+    object HomeScreen: Screen()
 }

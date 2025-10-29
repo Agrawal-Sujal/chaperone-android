@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,9 +20,11 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.raven.chaperone.ui.screens.commonComponents.maps.MapSearchScreen
 import com.raven.chaperone.ui.screens.walker.home.HomeScreen
+import com.raven.chaperone.ui.theme.lightPurple
+import com.raven.chaperone.ui.theme.textPurple
 
 sealed class BottomNavItem(val screen: Screen, val label: String, val icon: ImageVector) {
-    data object Home : BottomNavItem(Screen.WalksHomeScreen, "Home", Icons.Default.Home)
+    data object Home : BottomNavItem(Screen.HomeScreen(), "Home", Icons.Default.Home)
 
     data object Walks : BottomNavItem(Screen.WalksHomeScreen, "Walks", Icons.Default.DirectionsRun)
     data object Explore : BottomNavItem(Screen.ExplorePage, "Explore", Icons.Default.Search)
@@ -57,7 +60,12 @@ fun WalkerAppNavDisplay() {
                             onClick = {
                                 backstack.clear()
                                 backstack.add(item.screen)
-                            }
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = textPurple,
+                                selectedTextColor = textPurple,
+                                indicatorColor = lightPurple,
+                            )
                         )
                     }
                 }
