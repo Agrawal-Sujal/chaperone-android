@@ -75,6 +75,11 @@ class HomeScreenViewModel @Inject constructor(
                             earnings = data.total_earning,
                             rating = data.rating,
                             walksCompleted = data.total_walks,
+                            latLng = if (data.lat != null && data.long != null) LatLng(
+                                data.lat,
+                                data.long
+                            ) else null,
+                            locationName = data.location_name,
                             isLoading = false
                         )
 
