@@ -42,22 +42,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.raven.chaperone.ui.screens.commonComponents.CustomProgressBar
+import com.raven.chaperone.ui.theme.lightPurple
+import com.raven.chaperone.ui.theme.mediumPurple
+import com.raven.chaperone.ui.theme.textPurple
 
-val PrimaryPurple = Color(0xFF4A1449)
-val LightPurple = Color(0xFFE8D5E8)
+val PrimaryPurple = textPurple
+val LightPurple = lightPurple
 
 @Composable
-fun ExtraInfoScreen(viewModel: ExtraInfoViewModel = hiltViewModel(), goToWandererHomePage: () -> Unit,goToWalkerHomePage:()-> Unit) {
+fun ExtraInfoScreen(
+    viewModel: ExtraInfoViewModel = hiltViewModel(),
+    goToWandererHomePage: () -> Unit,
+    goToWalkerHomePage: () -> Unit
+) {
     val state by viewModel.state.collectAsState()
     val goToHomePage = state.goToHomePage
     LaunchedEffect(goToHomePage) {
         if (goToHomePage) {
-            if(state.userRole==1) goToWalkerHomePage()
+            if (state.userRole == 1) goToWalkerHomePage()
             else goToWandererHomePage()
         }
     }
@@ -65,7 +74,6 @@ fun ExtraInfoScreen(viewModel: ExtraInfoViewModel = hiltViewModel(), goToWandere
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF5F5F5))
         ) {
             // Header
             Column(
@@ -119,29 +127,28 @@ fun ExtraInfoScreen(viewModel: ExtraInfoViewModel = hiltViewModel(), goToWandere
         if (state.isLoading) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f)),
+                    .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = PrimaryPurple)
+                CustomProgressBar()
             }
         }
 
         // Error snackbar
-        state.error?.let { error ->
-            Snackbar(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(16.dp),
-                action = {
-                    TextButton(onClick = { /* Dismiss */ }) {
-                        Text("Dismiss")
-                    }
-                }
-            ) {
-                Text(error)
-            }
-        }
+//        state.error?.let { error ->
+//            Snackbar(
+//                modifier = Modifier
+//                    .align(Alignment.BottomCenter)
+//                    .padding(16.dp),
+//                action = {
+//                    TextButton(onClick = { /* Dismiss */ }) {
+//                        Text("Dismiss")
+//                    }
+//                }
+//            ) {
+//                Text(error)
+//            }
+//        }
     }
 }
 
@@ -306,6 +313,8 @@ fun WandererDetailsScreen(state: OnboardingState, viewModel: ExtraInfoViewModel)
                 checked = state.companionLanguages.contains(index),
                 onCheckedChange = { viewModel.onEvent(OnboardingEvent.ToggleLanguage(index)) }
             )
+            Spacer(modifier = Modifier.height(8.dp))
+
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -320,6 +329,8 @@ fun WandererDetailsScreen(state: OnboardingState, viewModel: ExtraInfoViewModel)
                 checked = state.preferredCharities.contains(index),
                 onCheckedChange = { viewModel.onEvent(OnboardingEvent.ToggleCharity(index)) }
             )
+            Spacer(modifier = Modifier.height(8.dp))
+
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -450,6 +461,7 @@ fun WalkerDetailsScreen(state: OnboardingState, viewModel: ExtraInfoViewModel) {
                 selected = state.walkerGender == index,
                 onClick = { viewModel.onEvent(OnboardingEvent.SetWalkerGender(index)) }
             )
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -464,6 +476,7 @@ fun WalkerDetailsScreen(state: OnboardingState, viewModel: ExtraInfoViewModel) {
                 checked = state.walkerLanguages.contains(index),
                 onCheckedChange = { viewModel.onEvent(OnboardingEvent.ToggleWalkerLanguage(index)) }
             )
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -606,6 +619,8 @@ fun PaceSelector(selectedPace: Int, onPaceSelected: (Int) -> Unit) {
                 selected = selectedPace == index,
                 onClick = { onPaceSelected(index) }
             )
+            Spacer(modifier = Modifier.height(8.dp))
+
         }
     }
 }
@@ -621,6 +636,7 @@ fun GenderSelector(selectedGender: Int, onGenderSelected: (Int) -> Unit) {
                 selected = selectedGender == index,
                 onClick = { onGenderSelected(index) }
             )
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }

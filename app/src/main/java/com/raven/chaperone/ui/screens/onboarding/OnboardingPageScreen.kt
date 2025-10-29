@@ -28,6 +28,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.raven.chaperone.R
 import com.raven.chaperone.ui.theme.Purple400
+import com.raven.chaperone.ui.theme.mediumPurple
+
 
 data class OnboardingPageData(
     @DrawableRes val imageRes: Int,
@@ -130,7 +132,7 @@ fun OnboardingPageScreen(page: Int, onNextClick: () -> Unit) {
             Icon(
                 Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = "Next",
-                tint = Purple400,
+                tint = mediumPurple,
                 modifier = Modifier.size(28.dp)
             )
         }

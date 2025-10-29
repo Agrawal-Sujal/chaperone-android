@@ -1,6 +1,5 @@
-package com.raven.chaperone.ui.screens.wanderer.explore.search
+package com.raven.chaperone.ui.screens.commonComponents.maps
 
-import android.R.attr.name
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,14 +8,13 @@ import com.raven.chaperone.services.remote.NominatimApi
 import com.raven.chaperone.services.remote.SearchResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import kotlin.jvm.java
-
 
 @HiltViewModel
 class MapSearchViewModel @Inject constructor() : ViewModel() {

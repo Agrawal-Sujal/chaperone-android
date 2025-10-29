@@ -54,4 +54,9 @@ class SearchPageViewModel @Inject constructor() : ViewModel() {
     fun getLog(): Double? {
         return _log.value
     }
+
+    fun getLocation(): LatLng? {
+        if (_lat.value == null || _log.value == null) return null
+        return LatLng(_lat.value!!,_log.value!!)
+    }
 }

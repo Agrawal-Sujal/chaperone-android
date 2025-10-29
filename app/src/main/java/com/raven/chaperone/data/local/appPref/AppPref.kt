@@ -14,7 +14,7 @@ class AppPref(private val context: Context) {
 
     companion object {
         private val USER_ID = stringPreferencesKey("user_id")
-        private val USERNAME = stringPreferencesKey("username")
+        private val NAME = stringPreferencesKey("username")
         private val TOKEN = stringPreferencesKey("token")
 
         private val EMAIL = stringPreferencesKey("email")
@@ -25,6 +25,9 @@ class AppPref(private val context: Context) {
 
     val token: Flow<String?> = context.appDataStore.data.map { it[TOKEN] }
     val isIdVerified: Flow<Boolean?> = context.appDataStore.data.map { it[ID_VERIFIED] }
+
+    val name: Flow<String?> = context.appDataStore.data.map { it[NAME] }
+
 
     val isWalker: Flow<Boolean?> = context.appDataStore.data.map { it[IS_WALKER] }
 
@@ -43,6 +46,12 @@ class AppPref(private val context: Context) {
     suspend fun userRole(isWalker: Boolean) {
         context.appDataStore.edit { prefs ->
             prefs[IS_WALKER] = isWalker
+        }
+    }
+
+    suspend fun updateName(name:String){
+        context.appDataStore.edit { prefs->
+            prefs[NAME] = name
         }
     }
 

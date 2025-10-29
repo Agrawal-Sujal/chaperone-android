@@ -1,4 +1,4 @@
-package com.raven.chaperone.ui.screens.wanderer.explore.search
+package com.raven.chaperone.ui.screens.commonComponents.maps
 
 import android.Manifest
 import android.content.Context
@@ -7,21 +7,15 @@ import android.location.Location
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -32,13 +26,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -55,13 +50,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import androidx.core.location.LocationManagerCompat.getCurrentLocation
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -79,13 +77,27 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.raven.chaperone.R
 import com.raven.chaperone.services.remote.SearchResult
+import com.raven.chaperone.ui.screens.commonComponents.maps.MapSearchViewModel
+import com.raven.chaperone.ui.theme.lightPurple
+import com.raven.chaperone.ui.theme.textPurple
+import com.raven.chaperone.ui.theme.whiteBG
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapSearchScreen(
     viewModel: MapSearchViewModel = hiltViewModel(),
-    onBack: () -> Unit, onLocationSelected: (LatLng, String) -> Unit
+    onLocationSelected: (LatLng, String) -> Unit,
+    selectedLocation: LatLng?,
+    locationName: String?
 ) {
+    LaunchedEffect(selectedLocation) {
+        if (selectedLocation != null)
+            viewModel.selectLocation(
+                selectedLocation.latitude,
+                selectedLocation.longitude,
+                locationName!!
+            )
+    }
     val context = LocalContext.current
     val searchQuery by viewModel.searchQuery.collectAsState()
     val searchResults by viewModel.searchResults.collectAsState()
@@ -98,77 +110,94 @@ fun MapSearchScreen(
     var hasLocationPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                context, Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         )
     }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions()
+        ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         hasLocationPermission = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
                 permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
 
-        if (hasLocationPermission) {
-            getCurrentLocation(context, viewModel)
-        }
+        if (hasLocationPermission) getCurrentLocation(context, viewModel)
     }
 
     Box(Modifier.fillMaxSize()) {
 
+        // 🌍 Map Layer
         GoogleMapView(
             selectedLocation = selectedLocation,
             currentLocation = currentLocation,
-            onLocationSelected = { latLng ->
-                viewModel.selectLocationManually(latLng)
-            },
+            onLocationSelected = { latLng -> viewModel.selectLocationManually(latLng) },
             modifier = Modifier.fillMaxSize()
         )
-
-//        Column(modifier = Modifier.fillMaxSize()) {
-        AnimatedVisibility(
-            visible = isSearching,
-            enter = slideInVertically(
-                initialOffsetY = { -it },
-                animationSpec = tween(300, easing = FastOutSlowInEasing)
-            ) + fadeIn(),
-            exit = slideOutVertically(
-                targetOffsetY = { -it },
-                animationSpec = tween(300, easing = FastOutSlowInEasing)
-            ) + fadeOut(),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            SearchResultsPanel(
+        if (isSearching) {
+            Surface(modifier = Modifier.fillMaxSize(), color = whiteBG) { }
+        }
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            SearchBar(
                 searchQuery = searchQuery,
-                searchResults = searchResults,
-                onResultClick = { lat, lon, name ->
-                    viewModel.selectLocation(lat, lon, name)
-                }
+                isSearching = isSearching,
+                onSearchQueryChange = { viewModel.updateSearchQuery(it) },
+                onSearchQuery = { viewModel.search() },
+                onSearchClick = { viewModel.toggleSearch() },
+                onBackClick = { viewModel.toggleSearch() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 24.dp)
             )
-        }
-//        }
-        SearchBar(
-            searchQuery = searchQuery,
-            isSearching = isSearching,
-            onSearchQueryChange = { viewModel.updateSearchQuery(it) },
-            onSearchQuery = { viewModel.search() },
-            onSearchClick = { viewModel.toggleSearch() },
-            onBackClick = { viewModel.toggleSearch() },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
 
-        )
-        if (!isSearching) {
-            Button(onClick = {
-                selectedLocation?.let { onLocationSelected(it, displayName!!) }
-            }, modifier = Modifier.align(Alignment.BottomCenter)) {
-                Text("Confirm")
+            // 🔍 Search Overlay (Animated)
+            if (isSearching) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp)
+                        .shadow(16.dp, RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)),
+                    tonalElevation = 6.dp,
+                    shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
+                ) {
+                    SearchResultsPanel(
+                        searchQuery = searchQuery,
+                        searchResults = searchResults,
+                        onResultClick = { lat, lon, name ->
+                            viewModel.selectLocation(lat, lon, name)
+                        }
+                    )
+                }
             }
-
         }
-        if (!isSearching)
+
+        // 🧭 Floating Search Bar
+
+        // ✅ Confirm Button (animated visibility)
+        AnimatedVisibility(
+            visible = !isSearching && selectedLocation != null,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        ) {
+            Button(
+                onClick = {
+                    selectedLocation?.let { onLocationSelected(it, displayName ?: "Unknown") }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = textPurple
+                ),
+                modifier = Modifier
+                    .padding(bottom = 40.dp)
+                    .width(200.dp)
+                    .height(50.dp),
+                shape = RoundedCornerShape(16.dp),
+                elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 8.dp)
+            ) {
+                Text("Confirm Location", color = Color.White, fontWeight = FontWeight.SemiBold)
+            }
+        }
+
+
+        // 📍 Floating My Location Button
+        AnimatedVisibility(visible = !isSearching, modifier = Modifier.align(Alignment.BottomEnd)) {
             FloatingActionButton(
                 onClick = {
                     if (hasLocationPermission) {
@@ -183,10 +212,11 @@ fun MapSearchScreen(
                     }
                 },
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
+//                    .align(Alignment.BottomEnd)
                     .padding(16.dp),
-                containerColor = Color(0xFF4285F4),
-                contentColor = Color.White
+                containerColor = textPurple,
+                contentColor = Color.White,
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 8.dp)
             ) {
                 if (isLoadingLocation) {
                     CircularProgressIndicator(
@@ -198,9 +228,10 @@ fun MapSearchScreen(
                     Icon(Icons.Default.MyLocation, contentDescription = "My Location")
                 }
             }
-
+        }
     }
 }
+
 
 @Composable
 fun GoogleMapView(
@@ -248,7 +279,7 @@ fun GoogleMapView(
                 state = MarkerState(position = location),
                 title = "Selected Location",
                 snippet = "Lat: ${location.latitude}, Lng: ${location.longitude}",
-                icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
+                icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)
             )
         }
 
@@ -272,9 +303,7 @@ fun SearchResultsPanel(
 ) {
     Surface(
         modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight(0.6f),
-        color = Color(0xFF1d2c4d),
+            .fillMaxSize(),
         shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
     ) {
         LazyColumn(
@@ -311,85 +340,89 @@ fun SearchBar(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    // Automatically focus and show keyboard when searching starts
+    LaunchedEffect(isSearching) {
+        if (isSearching) {
+            focusRequester.requestFocus()
+            keyboardController?.show()
+        } else {
+            keyboardController?.hide()
+        }
+    }
+
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(28.dp),
-        color = Color(0xFF2d3d5d),
         shadowElevation = 8.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Leading icon
             if (isSearching) {
                 IconButton(onClick = onBackClick) {
                     Icon(
-                        Icons.Default.ArrowBack,
+                        imageVector = Icons.Default.ArrowBack,
                         contentDescription = "Back",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
+                        tint = Color.Black
                     )
                 }
             } else {
-                Icon(
-                    Icons.Default.Menu,
-                    contentDescription = "Menu",
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            if (isSearching) {
-                TextField(
-                    value = searchQuery,
-                    onValueChange = onSearchQueryChange,
-                    modifier = Modifier.weight(1f),
-
-                    placeholder = {
-                        Text("Search here", color = Color.Gray)
-                    },
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
-                    ),
-                    singleLine = true
-                )
-            } else {
-                Text(
-                    if (searchQuery == "")
-                        "Search here" else searchQuery,
-                    color = Color.Gray,
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable { onSearchClick() }
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-            if (isSearching)
-                Icon(
-                    Icons.Default.Search,
-                    contentDescription = "Search",
-                    tint = Color(0xFF4285F4),
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clickable {
-                            onSearchQuery()
-                        },
-
+                IconButton(onClick = onSearchClick) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search",
+                        tint = Color.Black
                     )
+                }
+            }
+
+            // Search text field
+            TextField(
+                value = searchQuery,
+                onValueChange = onSearchQueryChange,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 8.dp)
+                    .focusRequester(focusRequester),
+                enabled = isSearching,
+                placeholder = {
+                    Text(
+                        text = "Search here",
+                        color = Color.LightGray
+                    )
+                },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent
+                ),
+                singleLine = true
+            )
+
+            // Search icon (only visible when active)
+            if (isSearching) {
+                IconButton(onClick = onSearchQuery) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search",
+                        tint = Color.Black
+                    )
+                }
+            }
         }
     }
 }
+
 
 @Composable
 fun SearchResultItem(result: SearchResult, onClick: () -> Unit) {
@@ -404,13 +437,13 @@ fun SearchResultItem(result: SearchResult, onClick: () -> Unit) {
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(Color(0xFF2d3d5d)),
+                .background(lightPurple),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 Icons.Default.LocationOn,
                 contentDescription = null,
-                tint = Color(0xFF4285F4),
+                tint = textPurple,
                 modifier = Modifier.size(24.dp)
             )
         }
@@ -418,7 +451,6 @@ fun SearchResultItem(result: SearchResult, onClick: () -> Unit) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 result.name.ifEmpty { result.type },
-                color = Color.White,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium
             )

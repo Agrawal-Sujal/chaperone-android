@@ -30,13 +30,14 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.raven.chaperone.domain.model.accounts.Feedback
 import com.raven.chaperone.domain.model.accounts.WalkerInfoResponse
+import com.raven.chaperone.ui.screens.commonComponents.CustomProgressBar
 import com.raven.chaperone.ui.screens.wanderer.explore.searchResult.WalkerProfileView
+import com.raven.chaperone.ui.theme.textPurple
 
 @Composable
 fun WalkerInfoScreen(
     viewModel: WalkerInfoViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
-    onRequestWalk: () -> Unit,
     walkerProfileView: WalkerProfileView?,
     walkerId: Int?
 ) {
@@ -61,6 +62,7 @@ fun WalkerInfoScreen(
         // Header - Always visible
         WalkerInfoHeader(onBackClick = onBackClick)
 
+        Spacer(modifier = Modifier.height(12.dp))
         // Content based on state
         when (val state = uiState) {
             is WalkerInfoUiState.Loading -> {
@@ -110,8 +112,8 @@ fun WalkerInfoHeader(onBackClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp)
-            .background(Color(0xFF5E2C7E))
+            .height(80.dp)
+            .background(textPurple)
     ) {
         IconButton(
             onClick = onBackClick,
@@ -150,18 +152,19 @@ fun LoadingState() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(60.dp),
-                color = Color(0xFF5E2C7E),
-                strokeWidth = 4.dp
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = "Loading walker information...",
-                fontSize = 16.sp,
-                color = Color.Gray,
-                fontWeight = FontWeight.Medium
-            )
+            CustomProgressBar()
+//            CircularProgressIndicator(
+//                modifier = Modifier.size(60.dp),
+//                color = Color(0xFF5E2C7E),
+//                strokeWidth = 4.dp
+//            )
+//            Spacer(modifier = Modifier.height(24.dp))
+//            Text(
+//                text = "Loading walker information...",
+//                fontSize = 16.sp,
+//                color = Color.Gray,
+//                fontWeight = FontWeight.Medium
+//            )
         }
     }
 }
@@ -223,7 +226,7 @@ fun ErrorState(
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF5E2C7E)
+                    containerColor = textPurple
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -249,9 +252,9 @@ fun ErrorState(
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = Color(0xFF5E2C7E)
+                    contentColor = textPurple
                 ),
-                border = androidx.compose.foundation.BorderStroke(2.dp, Color(0xFF5E2C7E)),
+                border = androidx.compose.foundation.BorderStroke(2.dp, textPurple),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Icon(
@@ -291,8 +294,7 @@ fun WalkerInfoContent(
             item {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .offset(y = (-80).dp),
+                        .fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
                     AsyncImage(
@@ -314,7 +316,6 @@ fun WalkerInfoContent(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .offset(y = (-60).dp)
                         .padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -322,7 +323,7 @@ fun WalkerInfoContent(
                         text = "${walkerInfo.name ?: "Unknown"}",
                         fontSize = 26.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF5E2C7E)
+                        color =textPurple
                     )
                 }
             }
@@ -332,14 +333,13 @@ fun WalkerInfoContent(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .offset(y = (-50).dp)
                         .padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "${String.format("%.0f", walkerInfo.rating)}/5",
-                        fontSize = 18.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -357,7 +357,6 @@ fun WalkerInfoContent(
                     color = Color(0xFF333333),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .offset(y = (-40).dp)
                         .padding(horizontal = 32.dp)
                 )
             }
@@ -367,7 +366,6 @@ fun WalkerInfoContent(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .offset(y = (-20).dp)
                         .padding(horizontal = 16.dp)
                 ) {
                     Row(
@@ -383,7 +381,7 @@ fun WalkerInfoContent(
                             Spacer(modifier = Modifier.width(8.dp))
                             InfoCard(
                                 icon = Icons.Default.LocationOn,
-                                title = "${walkerProfileView.distance} km Away",
+                                title = "${walkerProfileView.distance.toFloat()} km Away",
                                 modifier = Modifier.weight(1f)
                             )
                         }
@@ -445,7 +443,7 @@ fun WalkerInfoContent(
                                 text = if (showAllFeedbacks) "View less" else "View more",
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFF5E2C7E)
+                                color =textPurple
                             )
                             Icon(
                                 imageVector = if (showAllFeedbacks)
@@ -453,7 +451,7 @@ fun WalkerInfoContent(
                                 else
                                     Icons.Default.KeyboardArrowDown,
                                 contentDescription = null,
-                                tint = Color(0xFF5E2C7E)
+                                tint =textPurple
                             )
                         }
                     }
@@ -474,10 +472,11 @@ fun WalkerInfoContent(
                     .padding(16.dp)
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF5E2C7E)
+                    containerColor = textPurple
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
+
                 Text(
                     text = "Request A Walk",
                     fontSize = 18.sp,
@@ -536,10 +535,10 @@ fun RatingStars(rating: Double) {
                 imageVector = Icons.Default.Star,
                 contentDescription = null,
                 tint = if (index < rating.toInt())
-                    Color(0xFFFFC107)
+                    Color.Yellow
                 else
                     Color.LightGray,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(20.dp)
             )
         }
     }
@@ -569,7 +568,7 @@ fun InfoCard(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = Color(0xFF5E2C7E),
+                tint = textPurple,
                 modifier = Modifier.size(32.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -700,7 +699,7 @@ fun LoadingBottomSheetContent() {
         // Animated Progress Circle
         CircularProgressIndicator(
             modifier = Modifier.size(80.dp),
-            color = Color(0xFF5E2C7E),
+            color = textPurple,
             strokeWidth = 6.dp
         )
 
@@ -783,7 +782,7 @@ fun SuccessBottomSheetContent(onDismiss: () -> Unit) {
             text = "Sent Request Successfully.",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF5E2C7E),
+            color = textPurple,
             textAlign = TextAlign.Center
         )
 
@@ -874,7 +873,7 @@ fun ErrorBottomSheetContent(
                 .fillMaxWidth()
                 .height(56.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF5E2C7E)
+                containerColor = textPurple
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
@@ -900,9 +899,9 @@ fun ErrorBottomSheetContent(
                 .fillMaxWidth()
                 .height(56.dp),
             colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = Color(0xFF5E2C7E)
+                contentColor = textPurple
             ),
-            border = androidx.compose.foundation.BorderStroke(2.dp, Color(0xFF5E2C7E)),
+            border = androidx.compose.foundation.BorderStroke(2.dp, textPurple),
             shape = RoundedCornerShape(12.dp)
         ) {
             Text(

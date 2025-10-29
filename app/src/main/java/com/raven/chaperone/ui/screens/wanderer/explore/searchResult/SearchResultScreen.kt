@@ -1,7 +1,10 @@
 package com.raven.chaperone.ui.screens.wanderer.explore.searchResult
 
 import android.R.attr.padding
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
@@ -32,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -39,6 +44,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
+import com.raven.chaperone.ui.screens.commonComponents.CustomProgressBar
+import com.raven.chaperone.ui.screens.wanderer.explore.walkerProfile.WalkerInfoHeader
+import com.raven.chaperone.ui.theme.lightGray
+import com.raven.chaperone.ui.theme.textGray
+import com.raven.chaperone.ui.theme.textPurple
+import com.raven.chaperone.ui.theme.whiteBG
 
 
 data class SearchData(
@@ -64,7 +75,8 @@ data class WalkerProfileView(
 fun SearchResultScreen(
     searchData: SearchData,
     viewModel: SearchResultViewModel = hiltViewModel(),
-    onViewProfileClick: (WalkerProfileView) -> Unit
+    onViewProfileClick: (WalkerProfileView) -> Unit,
+    onBackClick:()-> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -73,12 +85,13 @@ fun SearchResultScreen(
     }
     Box(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .background(whiteBG),
         contentAlignment = Alignment.Center
     ) {
         when (val state = uiState) {
             is ExploreUiState.Loading -> {
-                CircularProgressIndicator()
+                CustomProgressBar()
             }
 
             is ExploreUiState.Error -> {
@@ -89,38 +102,44 @@ fun SearchResultScreen(
             }
 
             is ExploreUiState.Success -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp)
-                ) {
-                    item {
-                        LocationHeader(searchData)
-                        Spacer(Modifier.height(16.dp))
-                        Text(
-                            text = "Showing Companions Near You",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Spacer(Modifier.height(16.dp))
-                    }
+                Column(modifier = Modifier.fillMaxSize()) {
+                    WalkerInfoHeader(onBackClick = onBackClick)
+                    Spacer(modifier = Modifier.height(20.dp))
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        item {
 
-                    items(state.walkers) { walker ->
-                        WalkerCard(
-                            walker = walker, onViewProfileClick = {
-                                onViewProfileClick(
-                                    WalkerProfileView(
-                                        walker.id,
-                                        searchData.lat,
-                                        searchData.log,
-                                        searchData.locationName,
-                                        searchData.time,
-                                        searchData.date,
-                                        walker.distance
+                            LocationHeader(searchData)
+                            Spacer(Modifier.height(16.dp))
+                            Text(
+                                text = "Showing Companions Near You",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Spacer(Modifier.height(16.dp))
+                        }
+
+                        items(state.walkers) { walker ->
+                            WalkerCard(
+                                walker = walker, onViewProfileClick = {
+                                    onViewProfileClick(
+                                        WalkerProfileView(
+                                            walker.id,
+                                            searchData.lat,
+                                            searchData.log,
+                                            searchData.locationName,
+                                            searchData.time,
+                                            searchData.date,
+                                            walker.distance
+                                        )
                                     )
-                                )
-                            }
-                        )
-                        Spacer(Modifier.height(16.dp))
+                                }
+                            )
+                            Spacer(Modifier.height(16.dp))
+                        }
                     }
                 }
             }
@@ -152,23 +171,22 @@ fun ErrorSection(message: String, onRetry: () -> Unit) {
 @Composable
 fun LocationHeader(searchData: SearchData) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, lightGray)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
                 Text(searchData.locationName, fontWeight = FontWeight.Bold)
                 Text(
                     "${searchData.date}, ${searchData.time}",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = textGray
                 )
             }
-            Icon(Icons.Default.Edit, contentDescription = "Edit")
         }
     }
 }
@@ -178,7 +196,9 @@ fun WalkerCard(walker: Walker, onViewProfileClick: (Int) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, lightGray)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Image(
@@ -197,7 +217,7 @@ fun WalkerCard(walker: Walker, onViewProfileClick: (Int) -> Unit) {
                 text = walker.name,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
-                color = MaterialTheme.colorScheme.primary
+                color = textPurple
             )
 
             RatingRow(rating = walker.rating)
@@ -207,7 +227,7 @@ fun WalkerCard(walker: Walker, onViewProfileClick: (Int) -> Unit) {
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = textGray
             )
 
             Spacer(Modifier.height(8.dp))
@@ -219,10 +239,10 @@ fun WalkerCard(walker: Walker, onViewProfileClick: (Int) -> Unit) {
                     .height(48.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = textPurple
                 )
             ) {
-                Text("View Profile")
+                Text("View Profile", color = Color.White)
             }
         }
     }
@@ -235,7 +255,7 @@ fun RatingRow(rating: Float) {
         Spacer(Modifier.width(6.dp))
         repeat(5) { index ->
             val star = if (index < rating.toInt()) "★" else "☆"
-            Text(text = star, color = MaterialTheme.colorScheme.primary)
+            Text(text = star, color = if(index<rating.toInt()) Color.Yellow else lightGray)
         }
     }
 }

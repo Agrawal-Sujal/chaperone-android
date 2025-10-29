@@ -1,5 +1,7 @@
 package com.raven.chaperone.ui.screens.auth
 
+import android.content.Context
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raven.chaperone.data.local.appPref.AppPref
@@ -9,6 +11,7 @@ import com.raven.chaperone.ui.screens.wanderer.explore.searchResult.ExploreUiSta
 import com.raven.chaperone.ui.screens.wanderer.explore.searchResult.Walker
 import com.raven.chaperone.utils.Utils.parseResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,7 +48,7 @@ class IdVerificationViewModel @Inject constructor(val accountsServices: Accounts
         _state.value = _state.value.copy(dob = dob, error = null)
     }
 
-    fun submitVerification() {
+    fun submitVerification(context: Context) {
         val currentState = _state.value
 
         // Validation
@@ -92,10 +95,12 @@ class IdVerificationViewModel @Inject constructor(val accountsServices: Accounts
                         isLoading = false,
                         error = error
                     )
+                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
 
                 }
                 if (response.isSuccess) {
                     appPref.idVerified()
+                    appPref.updateName(_state.value.name)
                     _state.value = _state.value.copy(
                         isLoading = false,
                         isSuccess = true
@@ -107,6 +112,7 @@ class IdVerificationViewModel @Inject constructor(val accountsServices: Accounts
                     isLoading = false,
                     error = e.message ?: "An error occurred"
                 )
+                Toast.makeText(context, e.message ?: "An error occurred", Toast.LENGTH_SHORT).show()
             }
         }
     }

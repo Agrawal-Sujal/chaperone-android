@@ -1,8 +1,101 @@
 package com.raven.chaperone.ui.navigation.walker
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DirectionsRun
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.ui.NavDisplay
+import com.raven.chaperone.ui.screens.commonComponents.maps.MapSearchScreen
+import com.raven.chaperone.ui.screens.walker.home.HomeScreen
+
+sealed class BottomNavItem(val screen: Screen, val label: String, val icon: ImageVector) {
+    data object Home : BottomNavItem(Screen.WalksHomeScreen, "Home", Icons.Default.Home)
+
+    data object Walks : BottomNavItem(Screen.WalksHomeScreen, "Walks", Icons.Default.DirectionsRun)
+    data object Explore : BottomNavItem(Screen.ExplorePage, "Explore", Icons.Default.Search)
+}
 
 @Composable
-fun WalkerAppNavDisplay(){
+fun WalkerAppNavDisplay() {
+    val backstack = remember {
+        mutableStateListOf<Screen>(
+            Screen.HomeScreen()
+        )
+    }
 
+    val current = backstack.lastOrNull() ?: Screen.ExplorePage
+
+    val showBottomNav =
+        current is Screen.ExplorePage || current is Screen.WalksHomeScreen || current is Screen.HomeScreen
+
+    val bottomNavItems = listOf(
+        BottomNavItem.Home,
+        BottomNavItem.Explore,
+        BottomNavItem.Walks,
+    )
+    Scaffold(
+        bottomBar = {
+            if (showBottomNav) {
+                NavigationBar {
+                    bottomNavItems.forEach { item ->
+                        NavigationBarItem(
+                            icon = { Icon(item.icon, contentDescription = item.label) },
+                            label = { Text(item.label) },
+                            selected = current::class == item.screen::class,
+                            onClick = {
+                                backstack.clear()
+                                backstack.add(item.screen)
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    ) { paddingValues ->
+        NavDisplay(
+            backStack = backstack,
+            onBack = { backstack.removeLastOrNull() },
+            modifier = Modifier.padding(paddingValues),
+            entryProvider = entryProvider {
+                entry<Screen.ExplorePage> {
+
+                }
+
+                entry<Screen.WalksHomeScreen> {
+
+                }
+
+                entry<Screen.MapScreen> {
+                    MapSearchScreen(onLocationSelected = { latLng, name ->
+                        backstack.removeLastOrNull()
+                        val current = backstack.lastOrNull()
+                        if (current == Screen.HomeScreen()) {
+                            backstack.removeLastOrNull()
+                            backstack.add(Screen.HomeScreen(latLng, name))
+                        }
+
+                    }, selectedLocation = it.selectedLocation, locationName = it.locationName)
+                }
+
+                entry<Screen.HomeScreen> {
+                    HomeScreen(goToMapScreen = { latLng, name ->
+                        backstack.add(Screen.MapScreen(latLng, name))
+                    }, selectedLocation = it.selectedLocation, locationName = it.locationName)
+                }
+            }
+        )
+
+    }
 }
