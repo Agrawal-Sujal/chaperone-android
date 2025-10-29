@@ -1,5 +1,7 @@
 package com.raven.chaperone.ui.screens.auth
 
+import android.content.Context
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raven.chaperone.data.local.appPref.AppPref
@@ -7,6 +9,7 @@ import com.raven.chaperone.domain.model.accounts.UpdateProfileRequest
 import com.raven.chaperone.services.remote.AccountsServices
 import com.raven.chaperone.utils.Utils.parseResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -68,7 +71,8 @@ sealed class OnboardingEvent {
 @HiltViewModel
 class ExtraInfoViewModel @Inject constructor(
     val accountsServices: AccountsServices,
-    val appPref: AppPref
+    val appPref: AppPref,
+    @param:ApplicationContext val context: Context
 ) : ViewModel() {
     private val _state = MutableStateFlow(OnboardingState())
     val state: StateFlow<OnboardingState> = _state.asStateFlow()
@@ -216,7 +220,7 @@ class ExtraInfoViewModel @Inject constructor(
                         isLoading = false,
                         error = error
                     )
-
+                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
                 }
                 if (response.isSuccess) {
                     if (_state.value.userRole == 1)
@@ -233,6 +237,7 @@ class ExtraInfoViewModel @Inject constructor(
                     isLoading = false,
                     error = "Failed to submit application: ${e.message}"
                 )
+                Toast.makeText(context, "Failed to submit application: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }

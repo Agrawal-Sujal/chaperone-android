@@ -2,22 +2,17 @@ package com.raven.chaperone.ui.screens.auth
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.with
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -60,16 +55,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.raven.chaperone.R
+import com.raven.chaperone.ui.screens.commonComponents.CustomProgressBar
+import com.raven.chaperone.ui.theme.mediumPurple
+import com.raven.chaperone.ui.theme.textGray
+import com.raven.chaperone.ui.theme.textPurple
+import com.raven.chaperone.ui.theme.whiteBG
 
-val PurplePrimary = Color(0xFF4A1466)
-val PurpleLight = Color(0xFF6B1A8F)
-val LightGray = Color(0xFFF5F5F5)
-val MediumGray = Color(0xFFB0B0B0)
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @OptIn(ExperimentalAnimationApi::class)
@@ -113,7 +108,8 @@ fun SignInScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(24.dp)
+            .background(whiteBG),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -127,7 +123,7 @@ fun SignInScreen(
                 text = "CHAPERONE",
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Bold,
-                color = PurplePrimary,
+                color = textPurple,
                 letterSpacing = 2.sp
             )
 
@@ -169,7 +165,7 @@ fun SignInScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedBorderColor = Color(0xFFE0E0E0),
-                    focusedBorderColor = PurplePrimary,
+                    focusedBorderColor = textPurple,
                     unfocusedContainerColor = Color.White,
                     focusedContainerColor = Color.White
                 )
@@ -196,13 +192,13 @@ fun SignInScreen(
                                 Icons.Default.Visibility else Icons.Default.VisibilityOff,
                             contentDescription = if (uiState.passwordVisible)
                                 "Hide password" else "Show password",
-                            tint = MediumGray
+                            tint = textGray
                         )
                     }
                 },
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedBorderColor = Color(0xFFE0E0E0),
-                    focusedBorderColor = PurplePrimary,
+                    focusedBorderColor = textPurple,
                     unfocusedContainerColor = Color.White,
                     focusedContainerColor = Color.White
                 )
@@ -218,8 +214,8 @@ fun SignInScreen(
                     .height(56.dp),
                 enabled = !uiState.isLoading,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = PurplePrimary,
-                    disabledContainerColor = PurplePrimary.copy(alpha = 0.6f)
+                    containerColor = textPurple,
+                    disabledContainerColor = textPurple.copy(alpha = 0.6f)
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -246,7 +242,7 @@ fun SignInScreen(
             ) {
                 Text(
                     text = "Don't have an account? ",
-                    color = MediumGray,
+                    color = textGray,
                     fontSize = 15.sp
                 )
                 TextButton(
@@ -255,7 +251,7 @@ fun SignInScreen(
                 ) {
                     Text(
                         text = "Sign Up",
-                        color = PurplePrimary,
+                        color = textPurple,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -273,7 +269,7 @@ fun SignInScreen(
                 Text(
                     text = "Or continue with",
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MediumGray,
+                    color = textGray,
                     fontSize = 14.sp
                 )
                 Divider(modifier = Modifier.weight(1f), color = Color(0xFFE0E0E0))
@@ -285,7 +281,7 @@ fun SignInScreen(
             if (uiState.isGoogleSignInInProgress) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
-                    color = PurplePrimary,
+                    color = mediumPurple,
                     strokeWidth = 2.dp
                 )
             } else {
@@ -293,7 +289,6 @@ fun SignInScreen(
                     painter = painterResource(id = R.drawable.siwg_button),
                     contentDescription = "",
                     modifier = Modifier
-//                        .size(56.dp)
                         .clickable(enabled = true, onClick = {
                             viewModel.signInWithGoogle(
                                 context,
@@ -327,7 +322,8 @@ fun SignUpScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(24.dp)
+            .background(whiteBG),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -341,7 +337,7 @@ fun SignUpScreen(
                 text = "CHAPERONE",
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Bold,
-                color = PurplePrimary,
+                color = textPurple,
                 letterSpacing = 2.sp
             )
 
@@ -383,7 +379,7 @@ fun SignUpScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedBorderColor = Color(0xFFE0E0E0),
-                    focusedBorderColor = PurplePrimary,
+                    focusedBorderColor = textPurple,
                     unfocusedContainerColor = Color.White,
                     focusedContainerColor = Color.White
                 )
@@ -410,13 +406,13 @@ fun SignUpScreen(
                                 Icons.Default.Visibility else Icons.Default.VisibilityOff,
                             contentDescription = if (uiState.passwordVisible)
                                 "Hide password" else "Show password",
-                            tint = MediumGray
+                            tint = textGray
                         )
                     }
                 },
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedBorderColor = Color(0xFFE0E0E0),
-                    focusedBorderColor = PurplePrimary,
+                    focusedBorderColor = textPurple,
                     unfocusedContainerColor = Color.White,
                     focusedContainerColor = Color.White
                 )
@@ -443,13 +439,13 @@ fun SignUpScreen(
                                 Icons.Default.Visibility else Icons.Default.VisibilityOff,
                             contentDescription = if (uiState.confirmPasswordVisible)
                                 "Hide password" else "Show password",
-                            tint = MediumGray
+                            tint = textGray
                         )
                     }
                 },
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedBorderColor = Color(0xFFE0E0E0),
-                    focusedBorderColor = PurplePrimary,
+                    focusedBorderColor = textPurple,
                     unfocusedContainerColor = Color.White,
                     focusedContainerColor = Color.White
                 )
@@ -465,8 +461,8 @@ fun SignUpScreen(
                     .height(56.dp),
                 enabled = !uiState.isLoading,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = PurplePrimary,
-                    disabledContainerColor = PurplePrimary.copy(alpha = 0.6f)
+                    containerColor = textPurple,
+                    disabledContainerColor = textPurple.copy(alpha = 0.6f)
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -493,7 +489,7 @@ fun SignUpScreen(
             ) {
                 Text(
                     text = "Already have an account? ",
-                    color = MediumGray,
+                    color = textGray,
                     fontSize = 15.sp
                 )
                 TextButton(
@@ -502,7 +498,7 @@ fun SignUpScreen(
                 ) {
                     Text(
                         text = "Sign In",
-                        color = PurplePrimary,
+                        color = textPurple,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -520,7 +516,7 @@ fun SignUpScreen(
                 Text(
                     text = "Or continue with",
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MediumGray,
+                    color = textGray,
                     fontSize = 14.sp
                 )
                 Divider(modifier = Modifier.weight(1f), color = Color(0xFFE0E0E0))
@@ -532,7 +528,7 @@ fun SignUpScreen(
             if (uiState.isGoogleSignInInProgress) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
-                    color = PurplePrimary,
+                    color = mediumPurple,
                     strokeWidth = 2.dp
                 )
             } else {
@@ -540,7 +536,6 @@ fun SignUpScreen(
                     painter = painterResource(id = R.drawable.siwg_button),
                     contentDescription = "",
                     modifier = Modifier
-//                        .size(56.dp)
                         .clickable(enabled = true, onClick = {
                             viewModel.signInWithGoogle(
                                 context,

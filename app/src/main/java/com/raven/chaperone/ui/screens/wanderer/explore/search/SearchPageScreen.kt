@@ -5,7 +5,6 @@ import android.app.TimePickerDialog
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.LocalIndication
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -27,9 +26,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -46,27 +45,33 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.google.android.gms.maps.model.LatLng
+import com.raven.chaperone.ui.screens.commonComponents.maps.MapSearchScreen
 import com.raven.chaperone.ui.screens.wanderer.explore.searchResult.SearchData
+import com.raven.chaperone.ui.theme.textPurple
 import java.util.Calendar
 
 @Composable
 fun SearchPageScreen(
     viewModel: SearchPageViewModel = hiltViewModel(),
-    goToResultScreen: (SearchData) -> Unit
+    goToResultScreen: (SearchData) -> Unit,
+    goToMapScreen: (LatLng?,String?) -> Unit,
+    selectedLocation: LatLng?,
+    locationName: String?
 ) {
-    var showMap by remember { mutableStateOf(false) }
-
+    LaunchedEffect(selectedLocation) {
+        if (selectedLocation != null) {
+            viewModel.setLocation(selectedLocation, locationName)
+        }
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         ScheduleWalkScreen(
             onSearchCompanions = goToResultScreen,
-            onSearchPlaces = { showMap = true },
+            onSearchPlaces = {
+                goToMapScreen(viewModel.getLocation(),viewModel.locationName.value)
+            },
             viewModel
         )
-        if (showMap)
-            MapSearchScreen(onBack = { showMap = false }, onLocationSelected = { p1, p2 ->
-                viewModel.setLocation(p1, p2)
-                showMap = false
-            })
+
     }
 
 }
@@ -113,7 +118,6 @@ fun ScheduleWalkScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFEF9F6))
             .padding(24.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
@@ -178,7 +182,7 @@ fun ScheduleWalkScreen(
         OutlinedTextField(
             value = date,
             onValueChange = {},
-            placeholder = { Text("Select Date (e.g., Today, October 10)") },
+            placeholder = { Text("Select Date") },
             trailingIcon = {
                 Icon(
                     imageVector = Icons.Default.CalendarToday,
@@ -192,7 +196,12 @@ fun ScheduleWalkScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { datePicker.show() },
-            singleLine = true
+            singleLine = true,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                focusedBorderColor = textPurple,
+            )
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -203,7 +212,7 @@ fun ScheduleWalkScreen(
         OutlinedTextField(
             value = time,
             onValueChange = {},
-            placeholder = { Text("Select Time (e.g., 5:00 PM)") },
+            placeholder = { Text("Select Time") },
             trailingIcon = {
                 Icon(
                     imageVector = Icons.Default.AccessTime,
@@ -217,7 +226,12 @@ fun ScheduleWalkScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { timePicker.show() },
-            singleLine = true
+            singleLine = true,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                focusedBorderColor = textPurple,
+            )
         )
 
         Spacer(modifier = Modifier.height(40.dp))
@@ -238,7 +252,7 @@ fun ScheduleWalkScreen(
                     )
                 }
             },
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF41015F)),
+            colors = ButtonDefaults.buttonColors(containerColor = textPurple),
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier
                 .fillMaxWidth()

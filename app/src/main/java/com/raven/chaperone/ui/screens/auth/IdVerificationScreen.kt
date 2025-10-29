@@ -1,5 +1,6 @@
 package com.raven.chaperone.ui.screens.auth
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,12 +28,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.raven.chaperone.ui.theme.textPurple
+import com.raven.chaperone.ui.theme.whiteBG
 
 @Composable
 fun IdVerificationScreen(
@@ -40,11 +44,11 @@ fun IdVerificationScreen(
     goToExtraInfoScreen: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
-
+    val context = LocalContext.current
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF5F5F5))
+            .background(whiteBG)
     ) {
         Column(
             modifier = Modifier
@@ -60,32 +64,11 @@ fun IdVerificationScreen(
                 style = TextStyle(
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4A148C),
+                    color = textPurple,
                     letterSpacing = 2.sp
                 )
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Progress Indicator (visual only)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(4.dp)
-                        .background(Color(0xFF4A148C), RoundedCornerShape(2.dp))
-                )
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(4.dp)
-                        .padding(start = 8.dp)
-                        .background(Color(0xFFE0E0E0), RoundedCornerShape(2.dp))
-                )
-            }
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -110,8 +93,8 @@ fun IdVerificationScreen(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !state.isLoading,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF4A148C),
-                    focusedLabelColor = Color(0xFF4A148C)
+                    focusedBorderColor = textPurple,
+                    focusedLabelColor = textPurple
                 ),
                 singleLine = true
             )
@@ -127,8 +110,8 @@ fun IdVerificationScreen(
                 enabled = !state.isLoading,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF4A148C),
-                    focusedLabelColor = Color(0xFF4A148C)
+                    focusedBorderColor = textPurple,
+                    focusedLabelColor = textPurple
                 ),
                 singleLine = true
             )
@@ -145,8 +128,8 @@ fun IdVerificationScreen(
                 enabled = !state.isLoading,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF4A148C),
-                    focusedLabelColor = Color(0xFF4A148C)
+                    focusedBorderColor = textPurple,
+                    focusedLabelColor = textPurple
                 ),
                 singleLine = true
             )
@@ -155,12 +138,12 @@ fun IdVerificationScreen(
 
             // Submit Button
             Button(
-                onClick = { viewModel.submitVerification() },
+                onClick = { viewModel.submitVerification(context) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4A148C)
+                    containerColor = textPurple
                 ),
                 shape = RoundedCornerShape(8.dp),
                 enabled = !state.isLoading
@@ -182,33 +165,35 @@ fun IdVerificationScreen(
         }
 
         // Error Snackbar
-        state.error?.let { error ->
-            Snackbar(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(16.dp),
-                action = {
-                    TextButton(onClick = { viewModel.clearError() }) {
-                        Text("Dismiss", color = Color.White)
-                    }
-                },
-                containerColor = Color(0xFFD32F2F)
-            ) {
-                Text(error)
-            }
-        }
+//        state.error?.let { error ->
+//            Snackbar(
+//                modifier = Modifier
+//                    .align(Alignment.BottomCenter)
+//                    .padding(16.dp),
+//                action = {
+//                    TextButton(onClick = { viewModel.clearError() }) {
+//                        Text("Dismiss", color = Color.White)
+//                    }
+//                },
+//                containerColor = Color(0xFFD32F2F)
+//            ) {
+//                Text(error)
+//            }
+//        }
+
 
         if (state.isSuccess) {
-            AlertDialog(
-                onDismissRequest = { },
-                title = { Text("Success") },
-                text = { Text("Verification submitted successfully!") },
-                confirmButton = {
-                    TextButton(onClick = { goToExtraInfoScreen() }) {
-                        Text("OK", color = Color(0xFF4A148C))
-                    }
-                }
-            )
+            goToExtraInfoScreen()
+//            AlertDialog(
+//                onDismissRequest = { },
+//                title = { Text("Success") },
+//                text = { Text("Verification submitted successfully!") },
+//                confirmButton = {
+//                    TextButton(onClick = { goToExtraInfoScreen() }) {
+//                        Text("OK", color = Color(0xFF4A148C))
+//                    }
+//                }
+//            )
         }
     }
 }

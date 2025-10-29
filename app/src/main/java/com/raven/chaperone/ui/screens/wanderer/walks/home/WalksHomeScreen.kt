@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.raven.chaperone.ui.theme.textPurple
 
 @Composable
 fun WalksHomeScreen(
@@ -129,12 +130,12 @@ fun FilterDropdown(
                     },
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF5E2C7E)
+                    color = textPurple
                 )
                 Icon(
                     imageVector = if (showMenu) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                     contentDescription = null,
-                    tint = Color(0xFF5E2C7E)
+                    tint = textPurple
                 )
             }
         }
@@ -183,13 +184,13 @@ fun FilterMenuItem(
             text = text,
             fontSize = 16.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-            color = Color(0xFF5E2C7E)
+            color = textPurple
         )
         if (isSelected) {
             Icon(
                 imageVector = Icons.Default.Check,
                 contentDescription = null,
-                tint = Color(0xFF5E2C7E),
+                tint = textPurple,
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -207,7 +208,7 @@ fun LoadingContent() {
         ) {
             CircularProgressIndicator(
                 modifier = Modifier.size(50.dp),
-                color = Color(0xFF5E2C7E),
+                color = textPurple,
                 strokeWidth = 4.dp
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -258,7 +259,7 @@ fun ErrorContent(
             Button(
                 onClick = onRetry,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF5E2C7E)
+                    containerColor = textPurple
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -377,7 +378,7 @@ fun RequestSentCard(
                             text = request.walker_name ?: "Unknown",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF5E2C7E)
+                            color = textPurple
                         )
                         if (request.is_verified) {
                             Spacer(modifier = Modifier.width(8.dp))
@@ -441,7 +442,7 @@ fun RequestSentCard(
                 Icon(
                     imageVector = Icons.Default.DateRange,
                     contentDescription = null,
-                    tint = Color(0xFF5E2C7E),
+                    tint = textPurple,
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -463,7 +464,7 @@ fun RequestSentCard(
                     Icon(
                         imageVector = Icons.Default.LocationOn,
                         contentDescription = null,
-                        tint = Color(0xFF5E2C7E),
+                        tint = textPurple,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -589,9 +590,9 @@ fun RequestSentCard(
                 onClick = onViewProfile,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = Color(0xFF5E2C7E)
+                    contentColor = textPurple
                 ),
-                border = androidx.compose.foundation.BorderStroke(2.dp, Color(0xFF5E2C7E)),
+                border = androidx.compose.foundation.BorderStroke(2.dp, textPurple),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text(
@@ -655,7 +656,7 @@ fun SuccessDialog(
             Button(
                 onClick = onDismiss,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF5E2C7E)
+                    containerColor =textPurple
                 )
             ) {
                 Text("OK")
@@ -698,7 +699,7 @@ fun ErrorDialog(
             Button(
                 onClick = onDismiss,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF5E2C7E)
+                    containerColor = textPurple
                 )
             ) {
                 Text("OK")
