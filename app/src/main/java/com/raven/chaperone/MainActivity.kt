@@ -36,7 +36,7 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
-import com.raven.chaperone.ui.navigation.wanderer.AppNavDisplay
+import com.raven.chaperone.ui.navigation.auth.AppNavDisplay
 import com.raven.chaperone.ui.theme.ChaperoneTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
 //                        ButtonUI(webClientId)
 //                        SearchPageScreen()
 //                        MapSearchScreen()
-                    AppNavDisplay()
+                    AppNavDisplay(this@MainActivity)
 //                    }
                 }
 //                AppNavDisplay()

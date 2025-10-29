@@ -2,6 +2,7 @@ package com.raven.chaperone.di
 
 import com.raven.chaperone.data.local.appPref.AppPref
 import com.raven.chaperone.services.remote.AccountsServices
+import com.raven.chaperone.services.remote.AuthServices
 import com.raven.chaperone.services.remote.RequestsServices
 import com.raven.chaperone.services.remote.SearchServices
 import com.raven.chaperone.utils.Constants
@@ -56,5 +57,11 @@ class ServiceModule {
     fun provideRequestsServices(appPreferences: AppPref): RequestsServices =
         constructRetrofit(appPreferences)
             .create(RequestsServices::class.java)
+
+    @Singleton
+    @Provides
+    fun provideAuthServices(appPreferences: AppPref): AuthServices =
+        constructRetrofit(appPreferences)
+            .create(AuthServices::class.java)
 
 }
