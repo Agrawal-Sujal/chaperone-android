@@ -33,7 +33,8 @@ sealed class WithdrawState {
 }
 
 @HiltViewModel
-class WalksHomeScreenViewModel @Inject constructor(val requestsServices: RequestsServices): ViewModel() {
+class WalksHomeScreenViewModel @Inject constructor(val requestsServices: RequestsServices) :
+    ViewModel() {
     private val _uiState = MutableStateFlow<WalksUiState>(WalksUiState.Loading)
     val uiState: StateFlow<WalksUiState> = _uiState.asStateFlow()
 
@@ -53,29 +54,34 @@ class WalksHomeScreenViewModel @Inject constructor(val requestsServices: Request
     fun loadRequestSentWalks() {
         viewModelScope.launch {
             _uiState.value = WalksUiState.Loading
-
-            val response = parseResponse(requestsServices.getAllWandererRequest())
-            if (response.isFailed) {
-                val errorResponse = response.error
-                val error =
-                    if (errorResponse != null)
-                        errorResponse.detail ?: "Unknown error"
-                    else
-                        "Something went wrong"
-                _uiState.value = WalksUiState.Error(
-                    error?: "Failed to load walks"
-                )
-
-            }
-            if (response.isSuccess) {
-                val data = response.data
-                if (data != null) {
-                    val filteredRequests = data.filter { !it.fees_paid }
-                    _uiState.value = WalksUiState.Success(filteredRequests)
-                } else
+            try {
+                val response = parseResponse(requestsServices.getAllWandererRequest())
+                if (response.isFailed) {
+                    val errorResponse = response.error
+                    val error =
+                        if (errorResponse != null)
+                            errorResponse.detail ?: "Unknown error"
+                        else
+                            "Something went wrong"
                     _uiState.value = WalksUiState.Error(
-                         "Failed to load walks"
+                        error ?: "Failed to load walks"
                     )
+
+                }
+                if (response.isSuccess) {
+                    val data = response.data
+                    if (data != null) {
+                        val filteredRequests = data.filter { !it.fees_paid }
+                        _uiState.value = WalksUiState.Success(filteredRequests)
+                    } else
+                        _uiState.value = WalksUiState.Error(
+                            "Failed to load walks"
+                        )
+                }
+            } catch (e: Exception) {
+                _uiState.value = WalksUiState.Error(
+                    e.message ?: "Failed to load data. Please try again."
+                )
             }
 
         }
@@ -90,6 +96,7 @@ class WalksHomeScreenViewModel @Inject constructor(val requestsServices: Request
             WalkFilter.UPCOMING -> {
                 // TODO: Implement upcoming walks
             }
+
             WalkFilter.COMPLETED -> {
                 // TODO: Implement completed walks
             }
@@ -124,7 +131,7 @@ class WalksHomeScreenViewModel @Inject constructor(val requestsServices: Request
 
                 } else
                     _withdrawState.value = WithdrawState.Error(
-                         "Failed to withdraw request"
+                        "Failed to withdraw request"
                     )
             }
         }
