@@ -33,6 +33,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -275,14 +277,22 @@ fun SignInScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Divider(modifier = Modifier.weight(1f), color = Color(0xFFE0E0E0))
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    thickness = DividerDefaults.Thickness,
+                    color = Color(0xFFE0E0E0)
+                )
                 Text(
                     text = "Or continue with",
                     modifier = Modifier.padding(horizontal = 16.dp),
                     color = textGray,
                     fontSize = 14.sp
                 )
-                Divider(modifier = Modifier.weight(1f), color = Color(0xFFE0E0E0))
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    thickness = DividerDefaults.Thickness,
+                    color = Color(0xFFE0E0E0)
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -526,14 +536,22 @@ fun SignUpScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Divider(modifier = Modifier.weight(1f), color = Color(0xFFE0E0E0))
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    thickness = DividerDefaults.Thickness,
+                    color = Color(0xFFE0E0E0)
+                )
                 Text(
                     text = "Or continue with",
                     modifier = Modifier.padding(horizontal = 16.dp),
                     color = textGray,
                     fontSize = 14.sp
                 )
-                Divider(modifier = Modifier.weight(1f), color = Color(0xFFE0E0E0))
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    thickness = DividerDefaults.Thickness,
+                    color = Color(0xFFE0E0E0)
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
