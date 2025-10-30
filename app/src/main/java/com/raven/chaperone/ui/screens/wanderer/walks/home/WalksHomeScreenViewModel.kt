@@ -1,7 +1,14 @@
 package com.raven.chaperone.ui.screens.wanderer.walks.home
 
+import android.R.attr.order
+import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.raven.chaperone.domain.model.payment.CreateOrderRequest
+import com.raven.chaperone.domain.model.payment.CreateOrderResponse
+import com.raven.chaperone.payment.PaymentActivity
+import com.raven.chaperone.services.remote.PaymentServices
 import com.raven.chaperone.services.remote.RequestsServices
 import com.raven.chaperone.ui.screens.wanderer.explore.walkerProfile.RequestWalkState
 import com.raven.chaperone.utils.Utils.parseResponse
@@ -12,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.collections.filter
 
 sealed class WalksUiState {
     object Loading : WalksUiState()
@@ -33,7 +41,10 @@ sealed class WithdrawState {
 }
 
 @HiltViewModel
-class WalksHomeScreenViewModel @Inject constructor(val requestsServices: RequestsServices) :
+class WalksHomeScreenViewModel @Inject constructor(
+    val requestsServices: RequestsServices,
+    val paymentServices: PaymentServices
+) :
     ViewModel() {
     private val _uiState = MutableStateFlow<WalksUiState>(WalksUiState.Loading)
     val uiState: StateFlow<WalksUiState> = _uiState.asStateFlow()
@@ -50,7 +61,11 @@ class WalksHomeScreenViewModel @Inject constructor(val requestsServices: Request
     init {
         loadRequestSentWalks()
     }
-
+    fun showError(error:String?){
+        _uiState.value = WalksUiState.Error(
+            error ?: "Payment not completed"
+        )
+    }
     fun loadRequestSentWalks() {
         viewModelScope.launch {
             _uiState.value = WalksUiState.Loading
@@ -109,30 +124,37 @@ class WalksHomeScreenViewModel @Inject constructor(val requestsServices: Request
 
     fun withdrawRequest(requestId: Int) {
         viewModelScope.launch {
-            _withdrawState.value = WithdrawState.Loading(requestId)
-            val response = parseResponse(requestsServices.withdrawRequest(requestId))
-            if (response.isFailed) {
-                val errorResponse = response.error
-                val error =
-                    if (errorResponse != null)
-                        errorResponse.detail ?: "Unknown error"
-                    else
-                        "Something went wrong"
-                _withdrawState.value = WithdrawState.Error(
-                    error ?: "Failed to withdraw request"
-                )
+            try {
 
-            }
-            if (response.isSuccess) {
-                val data = response.data
-                if (data != null) {
-                    _withdrawState.value = WithdrawState.Success
-                    loadRequestSentWalks()
 
-                } else
+                _withdrawState.value = WithdrawState.Loading(requestId)
+                val response = parseResponse(requestsServices.withdrawRequest(requestId))
+                if (response.isFailed) {
+                    val errorResponse = response.error
+                    val error =
+                        if (errorResponse != null)
+                            errorResponse.detail ?: "Unknown error"
+                        else
+                            "Something went wrong"
                     _withdrawState.value = WithdrawState.Error(
-                        "Failed to withdraw request"
+                        error ?: "Failed to withdraw request"
                     )
+
+                }
+                if (response.isSuccess) {
+                    val data = response.data
+                    if (data != null) {
+                        _withdrawState.value = WithdrawState.Success
+                        loadRequestSentWalks()
+                    } else
+                        _withdrawState.value = WithdrawState.Error(
+                            "Failed to withdraw request"
+                        )
+                }
+            } catch (e: Exception) {
+                _withdrawState.value = WithdrawState.Error(
+                    message = e.message ?: "Failed to load data. Please try again."
+                )
             }
         }
     }
@@ -141,5 +163,39 @@ class WalksHomeScreenViewModel @Inject constructor(val requestsServices: Request
         _withdrawState.value = WithdrawState.Idle
     }
 
+    fun onPayFee(requestId: Int,onSuccess:(CreateOrderResponse)-> Unit) {
+        viewModelScope.launch {
+            _uiState.value = WalksUiState.Loading
+            try {
+                val response = parseResponse(paymentServices.createOrder(CreateOrderRequest(requestId)))
+                if (response.isFailed) {
+                    val errorResponse = response.error
+                    val error =
+                        if (errorResponse != null)
+                            errorResponse.detail ?: "Unknown error"
+                        else
+                            "Something went wrong"
+                    _uiState.value = WalksUiState.Error(
+                        error ?: "Failed to load walks"
+                    )
+
+                }
+                if (response.isSuccess) {
+                    val order = response.data
+                    if (order != null) {
+                        onSuccess(order)
+                    } else
+                        _uiState.value = WalksUiState.Error(
+                            "Failed to load walks"
+                        )
+                }
+            } catch (e: Exception) {
+                _uiState.value = WalksUiState.Error(
+                    e.message ?: "Failed to load data. Please try again."
+                )
+            }
+        }
+
+    }
 
 }

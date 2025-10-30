@@ -112,4 +112,7 @@ dependencies {
 
     implementation("io.coil-kt:coil-compose:2.7.0")
 
+    // Razorpay
+    implementation("com.razorpay:checkout:1.6.41")
+
 }
