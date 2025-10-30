@@ -175,7 +175,13 @@ class AuthViewModel @Inject constructor(val authServices: AuthServices, val appP
     }
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    fun signInWithGoogle(context: Context, webClientId: String, onSuccess: () -> Unit) {
+    fun signInWithGoogle(
+        context: Context,
+        webClientId: String,
+        goToVerificationScreen: () -> Unit,
+        goToProfileScreen: () -> Unit,
+        goToHomeScreen: (Boolean) -> Unit
+    ) {
         _uiState.value = _uiState.value.copy(
             isGoogleSignInInProgress = true,
             errorMessage = null
@@ -196,7 +202,13 @@ class AuthViewModel @Inject constructor(val authServices: AuthServices, val appP
                     .build()
 
                 // Sign in
-                val exception = signIn(request, context, onSuccess)
+                val exception = signIn(
+                    request,
+                    context,
+                    goToVerificationScreen,
+                    goToProfileScreen,
+                    goToHomeScreen
+                )
 
                 if (exception == null) {
                     _uiState.value = _uiState.value.copy(isGoogleSignInInProgress = false)
@@ -227,7 +239,9 @@ class AuthViewModel @Inject constructor(val authServices: AuthServices, val appP
     private suspend fun signIn(
         request: GetCredentialRequest,
         context: Context,
-        onSuccess: () -> Unit
+        goToVerificationScreen: () -> Unit,
+        goToProfileScreen: () -> Unit,
+        goToHomeScreen: (Boolean) -> Unit,
     ): Exception? {
         val credentialManager = CredentialManager.create(context)
         val failureMessage = "Sign in failed!"
@@ -244,7 +258,13 @@ class AuthViewModel @Inject constructor(val authServices: AuthServices, val appP
             Log.i(TAG, result.toString())
 
 
-            handleSignInWithGoogleOption(result, onSuccess, context)
+            handleSignInWithGoogleOption(
+                result,
+                goToVerificationScreen,
+                goToProfileScreen,
+                goToHomeScreen,
+                context
+            )
         } catch (e: GetCredentialException) {
             Toast.makeText(context, failureMessage, Toast.LENGTH_SHORT).show()
             Log.e(TAG, "$failureMessage: Failure getting credentials", e)
@@ -271,7 +291,9 @@ class AuthViewModel @Inject constructor(val authServices: AuthServices, val appP
 
     private suspend fun handleSignInWithGoogleOption(
         result: GetCredentialResponse,
-        onSuccess: () -> Unit,
+        goToVerificationScreen: () -> Unit,
+        goToProfileScreen: () -> Unit,
+        goToHomeScreen: (Boolean) -> Unit,
         context: Context
     ) {
         val credential = result.credential
@@ -283,7 +305,13 @@ class AuthViewModel @Inject constructor(val authServices: AuthServices, val appP
                         val googleIdTokenCredential = GoogleIdTokenCredential
                             .createFrom(credential.data)
                         Log.e(TAG, "Credential IdToken: ${googleIdTokenCredential.idToken}")
-                        sendTokenToBackend(googleIdTokenCredential.idToken, onSuccess, context)
+                        sendTokenToBackend(
+                            googleIdTokenCredential.idToken,
+                            goToVerificationScreen,
+                            goToProfileScreen,
+                            goToHomeScreen,
+                            context
+                        )
                     } catch (e: GoogleIdTokenParsingException) {
                         Log.e(TAG, "Received an invalid google id token response", e)
                     }
@@ -300,7 +328,9 @@ class AuthViewModel @Inject constructor(val authServices: AuthServices, val appP
 
     private suspend fun sendTokenToBackend(
         isToken: String,
-        onSuccess: () -> Unit,
+        goToVerificationScreen: () -> Unit,
+        goToProfileScreen: () -> Unit,
+        goToHomeScreen: (Boolean) -> Unit,
         context: Context
     ) {
         val response = parseResponse(authServices.signInWithGoogle(AuthRequest(isToken)))
@@ -324,7 +354,18 @@ class AuthViewModel @Inject constructor(val authServices: AuthServices, val appP
                 _uiState.value = _uiState.value.copy(isLoading = false)
                 Toast.makeText(context, "Sign in successful!", Toast.LENGTH_SHORT).show()
                 Log.i(TAG, "(☞ﾟヮﾟ)☞  Sign in Successful!  ☜(ﾟヮﾟ☜)")
-                onSuccess()
+                if (!data.is_verified) {
+                    goToVerificationScreen()
+                } else if (!data.is_profile_completed) {
+                    appPref.idVerified()
+                    appPref.updateName(data.name!!)
+                    goToProfileScreen()
+                } else {
+                    appPref.idVerified()
+                    appPref.updateName(data.name!!)
+                    appPref.userRole(data.is_walker!!)
+                    goToHomeScreen(data.is_walker)
+                }
             } else
                 _uiState.value =
                     _uiState.value.copy(isLoading = false, errorMessage = "Something went wrong")

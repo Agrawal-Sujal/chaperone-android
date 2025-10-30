@@ -64,7 +64,19 @@ fun AppNavDisplay(context: Context) {
                 }
             }
             entry<Screen.SignInUp> {
-                AuthScreen(goToIdVerificationScreen = { backstack.add(Screen.IdVerification) })
+                AuthScreen(
+                    goToIdVerificationScreen = {
+                        backstack.add(Screen.IdVerification)
+                    },
+                    goToProfileScreen = {
+                        backstack.add(Screen.ExtraInfoScreen)
+                    },
+                    onSuccess = { isWalker ->
+                        backstack.clear()
+                        if (isWalker)
+                            backstack.add(Screen.WalkerHome)
+                        else backstack.add(Screen.WandererHome)
+                    })
             }
             entry<Screen.IdVerification> {
                 IdVerificationScreen(goToExtraInfoScreen = {

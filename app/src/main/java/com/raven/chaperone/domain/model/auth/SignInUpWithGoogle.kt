@@ -6,5 +6,9 @@ data class AuthRequest(
 
 data class AuthResponse(
     val id: Int,
-    val token: String
+    val token: String,
+    val is_verified: Boolean,
+    val is_profile_completed: Boolean,
+    val name: String?,
+    val is_walker: Boolean?
 )

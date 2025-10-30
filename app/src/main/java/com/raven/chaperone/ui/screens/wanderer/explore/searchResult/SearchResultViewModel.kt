@@ -1,9 +1,7 @@
 package com.raven.chaperone.ui.screens.wanderer.explore.searchResult
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.maps.model.LatLng
 import com.raven.chaperone.domain.model.search.SearchWalkerRequest
 import com.raven.chaperone.services.remote.SearchServices
 import com.raven.chaperone.utils.Utils.parseResponse
@@ -20,34 +18,40 @@ class SearchResultViewModel @Inject constructor(val services: SearchServices) : 
 
     fun fetchWalkers(lat: Double, log: Double) {
         viewModelScope.launch {
-            val response = parseResponse(
-                services.searchWalkers(
-                    SearchWalkerRequest(
-                        lat,
-                        log
+            try {
+                val response = parseResponse(
+                    services.searchWalkers(
+                        SearchWalkerRequest(
+                            lat,
+                            log
+                        )
                     )
                 )
-            )
 
-            if (response.isFailed) {
-                val errorResponse = response.error
-                val error =
-                    if (errorResponse != null)
-                        errorResponse.detail ?: "Unknown error"
-                    else
-                        "Something went wrong"
-                _uiState.value = ExploreUiState.Error(error)
+                if (response.isFailed) {
+                    val errorResponse = response.error
+                    val error =
+                        if (errorResponse != null)
+                            errorResponse.detail ?: "Unknown error"
+                        else
+                            "Something went wrong"
+                    _uiState.value = ExploreUiState.Error(error)
 
-            }
-            if (response.isSuccess) {
-                val data = response.data
-                if (data != null) {
-                    _uiState.value = ExploreUiState.Success(data.results.map {it->
-                        Walker(it.id, it.name, it.photo_url, it.about, it.distance, it.rating)
-                    })
-                } else _uiState.value =
-                    ExploreUiState.Error("Failed to load companions. Please try again.")
+                }
+                if (response.isSuccess) {
+                    val data = response.data
+                    if (data != null) {
+                        _uiState.value = ExploreUiState.Success(data.results.map { it ->
+                            Walker(it.id, it.name, it.photo_url, it.about, it.distance, it.rating)
+                        })
+                    } else _uiState.value =
+                        ExploreUiState.Error("Failed to load companions. Please try again.")
 
+                }
+            } catch (e: Exception) {
+                _uiState.value = ExploreUiState.Error(
+                    e.message ?: "Failed to load data. Please try again."
+                )
             }
         }
     }

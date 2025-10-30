@@ -19,7 +19,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.raven.chaperone.ui.screens.commonComponents.maps.MapSearchScreen
+import com.raven.chaperone.ui.screens.commonComponents.maps.PointLocationMap
+import com.raven.chaperone.ui.screens.walker.explore.ExploreScreen
 import com.raven.chaperone.ui.screens.walker.home.HomeScreen
+import com.raven.chaperone.ui.screens.walker.wandererProfile.WandererProfileScreen
 import com.raven.chaperone.ui.theme.lightPurple
 import com.raven.chaperone.ui.theme.textPurple
 
@@ -78,11 +81,25 @@ fun WalkerAppNavDisplay() {
             modifier = Modifier.padding(paddingValues),
             entryProvider = entryProvider {
                 entry<Screen.ExplorePage> {
-
+                    ExploreScreen(goToMap = {
+                        backstack.add(Screen.PointLocation(it))
+                    }, goToWandererProfile = { requestId, wandererId ->
+                        backstack.add(Screen.WandererProfile(wandererId, requestId))
+                    })
                 }
 
                 entry<Screen.WalksHomeScreen> {
 
+                }
+
+                entry<Screen.WandererProfile> {
+                    WandererProfileScreen(
+                        onBackClick = {
+                            backstack.removeLastOrNull()
+                        },
+                        requestId = it.requestId,
+                        wandererId = it.wandererId
+                    )
                 }
 
                 entry<Screen.MapScreen> {
@@ -101,6 +118,10 @@ fun WalkerAppNavDisplay() {
                     HomeScreen(goToMapScreen = { latLng, name ->
                         backstack.add(Screen.MapScreen(latLng, name))
                     }, selectedLocation = it.selectedLocation, locationName = it.locationName)
+                }
+
+                entry<Screen.PointLocation> {
+                    PointLocationMap(it.latLng)
                 }
             }
         )

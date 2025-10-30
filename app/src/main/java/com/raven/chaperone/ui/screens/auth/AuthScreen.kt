@@ -69,7 +69,12 @@ import com.raven.chaperone.ui.theme.whiteBG
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun AuthScreen(viewModel: AuthViewModel = hiltViewModel(), goToIdVerificationScreen: () -> Unit) {
+fun AuthScreen(
+    viewModel: AuthViewModel = hiltViewModel(),
+    onSuccess: (Boolean) -> Unit,
+    goToIdVerificationScreen: () -> Unit,
+    goToProfileScreen: () -> Unit
+) {
     var isSignIn by remember { mutableStateOf(true) }
 
     // Reset state when switching between screens
@@ -82,13 +87,17 @@ fun AuthScreen(viewModel: AuthViewModel = hiltViewModel(), goToIdVerificationScr
         SignInScreen(
             viewModel = viewModel,
             onNavigateToSignUp = { isSignIn = false },
-            goToIdVerificationScreen
+            onSuccess,
+            goToIdVerificationScreen,
+            goToProfileScreen
         )
     } else {
         SignUpScreen(
             viewModel = viewModel,
             onNavigateToSignIn = { isSignIn = true },
-            goToIdVerificationScreen
+            onSuccess,
+            goToIdVerificationScreen,
+            goToProfileScreen
         )
     }
 
@@ -99,7 +108,9 @@ fun AuthScreen(viewModel: AuthViewModel = hiltViewModel(), goToIdVerificationScr
 fun SignInScreen(
     viewModel: AuthViewModel,
     onNavigateToSignUp: () -> Unit,
-    goToIdVerificationScreen: () -> Unit
+    onSuccess: (Boolean) -> Unit,
+    goToIdVerificationScreen: () -> Unit,
+    goToProfileScreen: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val webClientId = "230407577159-t2j39ncri8es7ojdlduutbfdurfh2qfm.apps.googleusercontent.com"
@@ -293,7 +304,9 @@ fun SignInScreen(
                             viewModel.signInWithGoogle(
                                 context,
                                 webClientId,
-                                goToIdVerificationScreen
+                                goToIdVerificationScreen,
+                                goToProfileScreen,
+                                onSuccess
                             )
                         }
                         )
@@ -313,7 +326,9 @@ fun SignInScreen(
 fun SignUpScreen(
     viewModel: AuthViewModel,
     onNavigateToSignIn: () -> Unit,
-    goToIdVerificationScreen: () -> Unit
+    onSuccess: (Boolean) -> Unit,
+    goToIdVerificationScreen: () -> Unit,
+    goToProfileScreen: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -540,7 +555,9 @@ fun SignUpScreen(
                             viewModel.signInWithGoogle(
                                 context,
                                 webClientId,
-                                goToIdVerificationScreen
+                                goToIdVerificationScreen,
+                                goToProfileScreen,
+                                onSuccess
                             )
                         }
                         )

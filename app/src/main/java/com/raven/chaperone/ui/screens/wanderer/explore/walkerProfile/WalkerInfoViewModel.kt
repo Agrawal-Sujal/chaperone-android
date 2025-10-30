@@ -1,5 +1,6 @@
 package com.raven.chaperone.ui.screens.wanderer.explore.walkerProfile
 
+import android.util.Log.e
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raven.chaperone.domain.model.accounts.WalkerInfoResponse
@@ -7,6 +8,7 @@ import com.raven.chaperone.domain.model.requests.RequestSendRequest
 import com.raven.chaperone.services.remote.AccountsServices
 import com.raven.chaperone.services.remote.RequestsServices
 import com.raven.chaperone.ui.screens.wanderer.explore.searchResult.WalkerProfileView
+import com.raven.chaperone.ui.screens.wanderer.walks.home.WalksUiState
 import com.raven.chaperone.utils.Utils.parseResponse
 import com.raven.chaperone.utils.convertToISODate
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -53,26 +55,31 @@ class WalkerInfoViewModel @Inject constructor(
     fun loadWalkerInfo(walkerId: Int) {
         viewModelScope.launch {
             _uiState.value = WalkerInfoUiState.Loading
+            try {
+                val response = parseResponse(accountsServices.getWalkerInfo(walkerId))
 
-            val response = parseResponse(accountsServices.getWalkerInfo(walkerId))
+                if (response.isFailed) {
+                    val errorResponse = response.error
+                    val error =
+                        if (errorResponse != null)
+                            errorResponse.detail ?: "Unknown error"
+                        else
+                            "Something went wrong"
+                    _uiState.value = WalkerInfoUiState.Error(error)
 
-            if (response.isFailed) {
-                val errorResponse = response.error
-                val error =
-                    if (errorResponse != null)
-                        errorResponse.detail ?: "Unknown error"
-                    else
-                        "Something went wrong"
-                _uiState.value = WalkerInfoUiState.Error(error)
+                }
+                if (response.isSuccess) {
+                    val data = response.data
+                    if (data != null) {
+                        _uiState.value = WalkerInfoUiState.Success(data)
+                    } else _uiState.value =
+                        WalkerInfoUiState.Error("Failed to load companions. Please try again.")
 
-            }
-            if (response.isSuccess) {
-                val data = response.data
-                if (data != null) {
-                    _uiState.value = WalkerInfoUiState.Success(data)
-                } else _uiState.value =
-                    WalkerInfoUiState.Error("Failed to load companions. Please try again.")
-
+                }
+            } catch (e: Exception) {
+                _uiState.value = WalkerInfoUiState.Error(
+                    e.message ?: "Failed to load data. Please try again."
+                )
             }
         }
     }
@@ -93,42 +100,47 @@ class WalkerInfoViewModel @Inject constructor(
         viewModelScope.launch {
             _showBottomSheet.value = true
             _requestWalkState.value = RequestWalkState.Loading
-
-            val response = parseResponse(
-                requestsServices.sendRequest(
-                    RequestSendRequest(
-                        walker_id = walkerProfileView.id,
-                        date = convertToISODate(walkerProfileView.date),
-                        time = walkerProfileView.time,
-                        loc_lat = walkerProfileView.lat,
-                        loc_long = walkerProfileView.log,
-                        location_name = walkerProfileView.locationName
+            try {
+                val response = parseResponse(
+                    requestsServices.sendRequest(
+                        RequestSendRequest(
+                            walker_id = walkerProfileView.id,
+                            date = convertToISODate(walkerProfileView.date),
+                            time = walkerProfileView.time,
+                            loc_lat = walkerProfileView.lat,
+                            loc_long = walkerProfileView.log,
+                            location_name = walkerProfileView.locationName
+                        )
                     )
                 )
-            )
 
-            if (response.isFailed) {
-                val errorResponse = response.error
-                val error =
-                    if (errorResponse != null)
-                        errorResponse.detail ?: "Unknown error"
-                    else
-                        "Something went wrong"
-                _requestWalkState.value = RequestWalkState.Error(
-                    error ?: "Failed to send request"
-                )
-
-            }
-            if (response.isSuccess) {
-                val data = response.data
-                if (data != null) {
-                    _requestWalkState.value = RequestWalkState.Success
-                    delay(3000)
-                    closeBottomSheet()
-                } else
+                if (response.isFailed) {
+                    val errorResponse = response.error
+                    val error =
+                        if (errorResponse != null)
+                            errorResponse.detail ?: "Unknown error"
+                        else
+                            "Something went wrong"
                     _requestWalkState.value = RequestWalkState.Error(
-                        "Failed to send request"
+                        error ?: "Failed to send request"
                     )
+
+                }
+                if (response.isSuccess) {
+                    val data = response.data
+                    if (data != null) {
+                        _requestWalkState.value = RequestWalkState.Success
+                        delay(3000)
+                        closeBottomSheet()
+                    } else
+                        _requestWalkState.value = RequestWalkState.Error(
+                            "Failed to send request"
+                        )
+                }
+            } catch (e: Exception) {
+                _requestWalkState.value = RequestWalkState.Error(
+                    e.message ?: "Failed to load data. Please try again."
+                )
             }
         }
     }

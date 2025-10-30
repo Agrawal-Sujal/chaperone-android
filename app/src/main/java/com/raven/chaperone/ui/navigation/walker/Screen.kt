@@ -7,9 +7,15 @@ sealed class Screen {
 
     object ExplorePage : Screen()
 
-    object WalksHomeScreen: Screen()
+    object WalksHomeScreen : Screen()
 
-    data class HomeScreen(val selectedLocation: LatLng? = null,val locationName:String? = null): Screen()
+    data class HomeScreen(val selectedLocation: LatLng? = null, val locationName: String? = null) :
+        Screen()
 
-    data class MapScreen(val selectedLocation: LatLng? = null,val locationName:String? = null) : Screen()
+    data class MapScreen(val selectedLocation: LatLng? = null, val locationName: String? = null) :
+        Screen()
+
+    data class PointLocation(val latLng: LatLng) : Screen()
+
+    data class WandererProfile(val wandererId: Int, val requestId: Int? = null):Screen()
 }
