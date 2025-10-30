@@ -129,14 +129,23 @@ class AuthViewModel @Inject constructor(val authServices: AuthServices, val appP
         }
     }
 
-    fun signUp() {
+    fun signUp(goToProfileScreen: () -> Unit) {
         val currentState = _uiState.value
 
         when {
+            // Mockup signup for testing (move above email format validation)
+            currentState.email == "test" -> {
+                _uiState.value = currentState.copy(isLoading = false, errorMessage = null)
+                goToProfileScreen()
+                // Simulate successful signup and navigate to ExtraInfoScreen
+            }
+
             currentState.email.isBlank() || currentState.password.isBlank() ||
                     currentState.confirmPassword.isBlank() -> {
                 _uiState.value = currentState.copy(errorMessage = "Please fill in all fields")
             }
+
+
 
             !android.util.Patterns.EMAIL_ADDRESS.matcher(currentState.email).matches() -> {
                 _uiState.value =
@@ -382,4 +391,3 @@ class AuthViewModel @Inject constructor(val authServices: AuthServices, val appP
         _uiState.value = AuthUiState()
     }
 }
-
