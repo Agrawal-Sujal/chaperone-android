@@ -1,6 +1,6 @@
 package com.raven.chaperone.ui.screens.auth
 
-import android.widget.ProgressBar
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,14 +26,12 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -42,15 +40,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.raven.chaperone.ui.screens.commonComponents.CustomProgressBar
+import com.raven.chaperone.ui.theme.BGPurple
 import com.raven.chaperone.ui.theme.lightPurple
-import com.raven.chaperone.ui.theme.mediumPurple
 import com.raven.chaperone.ui.theme.textPurple
 
 val PrimaryPurple = textPurple
@@ -95,7 +91,6 @@ fun ExtraInfoScreen(
                 // Progress bar
                 ProgressBar(
                     currentPage = state.currentPage,
-                    totalPages = if (state.userRole == -1) 0 else 3
                 )
             }
 
@@ -127,9 +122,11 @@ fun ExtraInfoScreen(
         if (state.isLoading) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
+                    .fillMaxSize()
+                    .background(BGPurple),
+                contentAlignment = Alignment.Center,
+
+                ) {
                 CustomProgressBar()
             }
         }
@@ -153,25 +150,21 @@ fun ExtraInfoScreen(
 }
 
 @Composable
-fun ProgressBar(currentPage: Int, totalPages: Int) {
-    Row(
+fun ProgressBar(currentPage: Int) {
+    val page = (currentPage+1).coerceIn(1, 3)
+    val targetProgress = page / 3f
+    val animatedProgress by animateFloatAsState(
+        targetValue = targetProgress,
+        label = "ProgressBarAnimation"
+    )
+    LinearProgressIndicator(
+        progress = { animatedProgress },
         modifier = Modifier
             .fillMaxWidth()
-            .height(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        repeat(totalPages.coerceAtLeast(1)) { index ->
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(4.dp)
-                    .background(
-                        if (index <= currentPage) PrimaryPurple else LightPurple,
-                        RoundedCornerShape(2.dp)
-                    )
-            )
-        }
-    }
+            .height(8.dp),
+        color = PrimaryPurple,
+        trackColor = LightPurple
+    )
 }
 
 @Composable
@@ -225,7 +218,7 @@ fun RoleButton(text: String, onClick: () -> Unit) {
             containerColor = Color.White,
             contentColor = PrimaryPurple
         ),
-        border = androidx.compose.foundation.BorderStroke(2.dp, PrimaryPurple)
+        border = BorderStroke(2.dp, PrimaryPurple)
     ) {
         Text(text = text, fontSize = 16.sp, fontWeight = FontWeight.Medium)
     }
@@ -594,7 +587,7 @@ fun ToggleButton(
             contentColor = PrimaryPurple
         ),
         shape = RoundedCornerShape(12.dp),
-        border = androidx.compose.foundation.BorderStroke(1.5.dp, PrimaryPurple)
+        border = BorderStroke(1.5.dp, PrimaryPurple)
     ) {
         if (selected) {
             Text("✓ ", fontWeight = FontWeight.Bold)

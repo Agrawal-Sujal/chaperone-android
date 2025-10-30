@@ -58,6 +58,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -65,6 +66,8 @@ import coil.compose.AsyncImage
 import com.raven.chaperone.domain.model.accounts.WandererInfoResponse
 import com.raven.chaperone.ui.screens.commonComponents.CustomProgressBar
 import com.raven.chaperone.ui.theme.textPurple
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun WandererProfileScreen(
