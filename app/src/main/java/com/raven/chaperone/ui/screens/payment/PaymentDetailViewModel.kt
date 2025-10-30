@@ -52,10 +52,10 @@ class PaymentDetailViewModel @Inject constructor(val paymentServices: PaymentSer
                     if (data != null) {
                         _uiState.value = PaymentUiState(
                             isLoading = false,
-                            isSuccess = if (data.status == "paid") true else false,
+                            isSuccess = true,
                             transactionId = data.payment_id,
                             amount = data.amount.toString(),
-                            timestamp = data.timeStamp
+                            timestamp = data.timestamp
                         )
                     } else {
                         _uiState.value = PaymentUiState(

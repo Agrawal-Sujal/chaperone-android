@@ -7,11 +7,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.raven.chaperone.domain.model.payment.VerifyOrderRequest
 import com.raven.chaperone.services.remote.PaymentServices
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
 import com.razorpay.PaymentResultWithDataListener
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,7 +21,8 @@ import org.json.JSONObject
 import javax.inject.Inject
 import kotlin.jvm.java
 
-class PaymentActivity : Activity(), PaymentResultWithDataListener {
+@AndroidEntryPoint
+class PaymentActivity : AppCompatActivity(), PaymentResultWithDataListener {
 
     @Inject
     lateinit var paymentServices: PaymentServices
@@ -29,7 +32,7 @@ class PaymentActivity : Activity(), PaymentResultWithDataListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val id = intent.getIntExtra("id",-1)
+        val id = intent.getIntExtra("id", -1)
         val orderId = intent.getStringExtra("order_id")
         val key = intent.getStringExtra("key")
         val amount = intent.getIntExtra("amount", 0)
@@ -63,24 +66,44 @@ class PaymentActivity : Activity(), PaymentResultWithDataListener {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val response =
-                    paymentServices.verifyOrder(VerifyOrderRequest(orderId, payment_id, signature,id.toInt()))
+                    paymentServices.verifyOrder(
+                        VerifyOrderRequest(
+                            orderId,
+                            payment_id,
+                            signature,
+                            id.toInt()
+                        )
+                    )
                 Log.d("TAG", response.body().toString())
-            } catch (e: Exception) {
+                if (response.isSuccessful && response.body() != null) {
+                    val resultIntent = Intent()
+                    resultIntent.putExtra("payment_id", id)
+                    setResult(RESULT_OK,resultIntent)
+                    finish()
+                } else {
+                    val resultIntent = Intent()
+                    resultIntent.putExtra("error", "Payment Failed")
+                    setResult(RESULT_CANCELED, resultIntent)
+                    finish()
+                }
 
+
+            } catch (e: Exception) {
+                val resultIntent = Intent()
+                resultIntent.putExtra("error", "Payment Failed: ${e.message}")
+                setResult(RESULT_CANCELED, resultIntent)
+                finish()
             }
 
         }
-        val resultIntent = Intent()
-        resultIntent.putExtra("payment_id", id)
-        setResult(RESULT_OK)
-        finish()
+
     }
 
     override fun onPaymentError(p0: Int, p1: String?, p2: PaymentData?) {
         Toast.makeText(this, "Payment Failed: $p1", Toast.LENGTH_LONG).show()
         val resultIntent = Intent()
         resultIntent.putExtra("error", "Payment Failed: $p1")
-        setResult(RESULT_CANCELED,resultIntent)
+        setResult(RESULT_CANCELED, resultIntent)
         finish()
     }
 
