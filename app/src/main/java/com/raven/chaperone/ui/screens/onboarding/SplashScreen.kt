@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +31,6 @@ import kotlinx.coroutines.delay
 fun SplashScreen(
     navigateBack: () -> Unit
 ) {
-    // Navigate after a delay
 
     LaunchedEffect(key1 = true) {
         delay(2500L) // 2.5-second splash screen
@@ -56,9 +56,9 @@ fun SplashScreen(
 
 
         Image(
-            painter = painterResource(id = R.drawable.engage),
-            contentDescription = "Splash Image",
-            modifier = Modifier.size(320.dp)
+            painter = painterResource(R.drawable.engage_text),
+            contentDescription = null,
+            modifier = Modifier.size(280.dp)
         )
 
     }
