@@ -4,5 +4,5 @@ data class PaymentInfoResponse(
     val payment_id: String,
     val status: String,
     val amount: Int,
-    val timeStamp: String
+    val timestamp: String
 )

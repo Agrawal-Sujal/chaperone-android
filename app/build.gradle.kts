@@ -115,4 +115,7 @@ dependencies {
     // Razorpay
     implementation("com.razorpay:checkout:1.6.41")
 
+    implementation("androidx.appcompat:appcompat:1.7.1")
+
+
 }
