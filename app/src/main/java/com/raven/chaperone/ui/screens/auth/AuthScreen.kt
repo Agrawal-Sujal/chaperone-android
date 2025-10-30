@@ -59,7 +59,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.raven.chaperone.R
-import com.raven.chaperone.ui.screens.commonComponents.CustomProgressBar
 import com.raven.chaperone.ui.theme.mediumPurple
 import com.raven.chaperone.ui.theme.textGray
 import com.raven.chaperone.ui.theme.textPurple

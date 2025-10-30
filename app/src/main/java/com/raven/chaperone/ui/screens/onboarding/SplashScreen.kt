@@ -1,13 +1,11 @@
 package com.raven.chaperone.ui.screens.onboarding
 
-import android.window.SplashScreen
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -17,13 +15,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.raven.chaperone.R
 import com.raven.chaperone.ui.theme.BGPurple
 import com.raven.chaperone.ui.theme.LexendFontFamily
-import com.raven.chaperone.ui.theme.LightYellow
 import com.raven.chaperone.ui.theme.Purple400
 import kotlinx.coroutines.delay
 

@@ -22,9 +22,6 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingExcept
 import com.raven.chaperone.data.local.appPref.AppPref
 import com.raven.chaperone.domain.model.auth.AuthRequest
 import com.raven.chaperone.services.remote.AuthServices
-import com.raven.chaperone.ui.screens.wanderer.explore.searchResult.ExploreUiState
-import com.raven.chaperone.ui.screens.wanderer.explore.searchResult.Walker
-import com.raven.chaperone.utils.Utils.error
 import com.raven.chaperone.utils.Utils.parseResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -144,7 +141,6 @@ class AuthViewModel @Inject constructor(val authServices: AuthServices, val appP
                     currentState.confirmPassword.isBlank() -> {
                 _uiState.value = currentState.copy(errorMessage = "Please fill in all fields")
             }
-
 
 
             !android.util.Patterns.EMAIL_ADDRESS.matcher(currentState.email).matches() -> {

@@ -24,7 +24,6 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.raven.chaperone.ui.navigation.auth.AppNavDisplay
-import com.raven.chaperone.ui.screens.walker.menu.MenuScreen
 import com.raven.chaperone.ui.theme.ChaperoneTheme
 import com.raven.chaperone.ui.theme.whiteBG
 import dagger.hilt.android.AndroidEntryPoint
