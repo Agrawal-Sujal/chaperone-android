@@ -1,5 +1,9 @@
 package com.raven.chaperone.ui.screens.wanderer.walks.home
 
+import android.app.Activity
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,24 +21,44 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.raven.chaperone.payment.PaymentActivity
 import com.raven.chaperone.ui.theme.textPurple
 
 @Composable
 fun WalksHomeScreen(
     viewModel: WalksHomeScreenViewModel = hiltViewModel(),
-    onNavigateToProfile: (Int) -> Unit
+    onNavigateToProfile: (Int) -> Unit,
+    goToPaymentDetailScreen:(Int)->Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val selectedFilter by viewModel.selectedFilter.collectAsState()
     val showFilterMenu by viewModel.showFilterMenu.collectAsState()
     val withdrawState by viewModel.withdrawState.collectAsState()
+    val context = LocalContext.current
 
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        when (result.resultCode) {
+            Activity.RESULT_OK -> {
+                val paymentId = result.data?.getStringExtra("payment_id")
+                viewModel.loadRequestSentWalks()
+                goToPaymentDetailScreen(paymentId!!.toInt())
+            }
+            Activity.RESULT_CANCELED -> {
+                val error = result.data?.getStringExtra("error")
+                viewModel.showError(error)
+
+            }
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -53,12 +77,14 @@ fun WalksHomeScreen(
             is WalksUiState.Loading -> {
                 LoadingContent()
             }
+
             is WalksUiState.Error -> {
                 ErrorContent(
                     message = state.message,
                     onRetry = { viewModel.loadRequestSentWalks() }
                 )
             }
+
             is WalksUiState.Success -> {
                 if (state.requests.isEmpty()) {
                     EmptyRequestsContent()
@@ -69,7 +95,17 @@ fun WalksHomeScreen(
                         onViewProfile = onNavigateToProfile,
                         onWithdraw = { viewModel.withdrawRequest(it) },
                         onPayFees = { requestId ->
+                            viewModel.onPayFee(requestId){order->
 
+                                val intent = Intent(context, PaymentActivity::class.java).apply {
+                                    putExtra("id",order.id)
+                                    putExtra("order_id", order.order_id)
+                                    putExtra("key", order.key)
+                                    putExtra("amount", order.amount)
+                                    putExtra("currency", order.currency)
+                                }
+                                launcher.launch(intent)
+                            }
                         }
                     )
                 }
@@ -85,12 +121,14 @@ fun WalksHomeScreen(
                 onDismiss = { viewModel.resetWithdrawState() }
             )
         }
+
         is WithdrawState.Error -> {
             ErrorDialog(
                 message = state.message,
                 onDismiss = { viewModel.resetWithdrawState() }
             )
         }
+
         else -> {}
     }
 }
@@ -519,6 +557,7 @@ fun RequestSentCard(
                         }
                     }
                 }
+
                 request.is_accepted -> {
                     // Show Pay Fees button
                     Button(
@@ -542,6 +581,7 @@ fun RequestSentCard(
                         )
                     }
                 }
+
                 else -> {
                     // Pending - Show Withdraw button
                     Button(
@@ -656,7 +696,7 @@ fun SuccessDialog(
             Button(
                 onClick = onDismiss,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor =textPurple
+                    containerColor = textPurple
                 )
             ) {
                 Text("OK")

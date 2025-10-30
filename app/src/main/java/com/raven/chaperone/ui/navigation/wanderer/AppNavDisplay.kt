@@ -21,6 +21,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.raven.chaperone.ui.navigation.wanderer.Screen
 import com.raven.chaperone.ui.screens.commonComponents.maps.MapSearchScreen
+import com.raven.chaperone.ui.screens.payment.PaymentDetailScreen
 import com.raven.chaperone.ui.screens.wanderer.explore.search.SearchPageScreen
 import com.raven.chaperone.ui.screens.wanderer.explore.searchResult.SearchResultScreen
 import com.raven.chaperone.ui.screens.wanderer.explore.walkerProfile.WalkerInfoScreen
@@ -44,7 +45,8 @@ fun AppNavDisplay() {
 
     val current = backstack.lastOrNull() ?: Screen.ExplorePage()
 
-    val showBottomNav = current is Screen.ExplorePage || current is Screen.WalksHomeScreen || current is Screen.HomeScreen
+    val showBottomNav =
+        current is Screen.ExplorePage || current is Screen.WalksHomeScreen || current is Screen.HomeScreen
 
     val bottomNavItems = listOf(
         BottomNavItem.Home,
@@ -127,10 +129,15 @@ fun AppNavDisplay() {
                 entry<Screen.WalksHomeScreen> {
                     WalksHomeScreen(onNavigateToProfile = {
                         backstack.add(Screen.WalkerInfo(null, it))
+                    }, goToPaymentDetailScreen = {
+                        backstack.add(Screen.PaymentDetailScreen(it))
                     })
                 }
                 entry<Screen.HomeScreen> {
                     HomeScreen()
+                }
+                entry<Screen.PaymentDetailScreen> {
+                    PaymentDetailScreen(paymentId = it.paymentId)
                 }
             }
         )
