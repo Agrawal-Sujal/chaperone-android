@@ -3,11 +3,9 @@ package com.raven.chaperone.ui.navigation.auth
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.raven.chaperone.data.local.appPref.AppPref
@@ -16,6 +14,7 @@ import com.raven.chaperone.ui.navigation.wanderer.AppNavDisplay
 import com.raven.chaperone.ui.screens.auth.AuthScreen
 import com.raven.chaperone.ui.screens.auth.ExtraInfoScreen
 import com.raven.chaperone.ui.screens.auth.IdVerificationScreen
+import com.raven.chaperone.ui.screens.commonComponents.WelcomeConfetti
 import com.raven.chaperone.ui.screens.onboarding.OnboardingPageScreen
 import com.raven.chaperone.ui.screens.onboarding.SplashScreen
 import kotlinx.coroutines.flow.first
@@ -87,10 +86,10 @@ fun AppNavDisplay(context: Context) {
             entry<Screen.ExtraInfoScreen> {
                 ExtraInfoScreen(goToWalkerHomePage = {
                     backstack.clear()
-                    backstack.add(Screen.WalkerHome)
+                    backstack.add(Screen.Confetti(0))
                 }, goToWandererHomePage = {
                     backstack.clear()
-                    backstack.add(Screen.WandererHome)
+                    backstack.add(Screen.Confetti(1))
                 })
             }
 
@@ -99,6 +98,24 @@ fun AppNavDisplay(context: Context) {
             }
             entry<Screen.WandererHome> {
                 AppNavDisplay()
+            }
+
+            entry<Screen.Confetti> {
+                WelcomeConfetti(
+                    onAnimationEnd = {
+                        when (it.role) {
+                            0 -> {
+                                backstack.clear()
+                                backstack.add(Screen.WalkerHome)
+                            }
+
+                            1 -> {
+                                backstack.clear()
+                                backstack.add(Screen.WandererHome)
+                            }
+                        }
+                    }
+                )
             }
         }
     )

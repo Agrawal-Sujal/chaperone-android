@@ -16,4 +16,6 @@ sealed class Screen {
     object WandererHome: Screen()
 
     object WalkerHome: Screen()
+
+    data class Confetti(val role: Int): Screen()
 }

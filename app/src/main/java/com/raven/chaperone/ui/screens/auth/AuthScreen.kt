@@ -470,7 +470,7 @@ fun SignUpScreen(
 
             // Sign Up Button
             Button(
-                onClick = viewModel::signUp,
+                onClick = { viewModel.signUp(goToProfileScreen) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -568,4 +568,3 @@ fun SignUpScreen(
         }
     }
 }
-
