@@ -3,9 +3,11 @@ package com.raven.chaperone.di
 import com.raven.chaperone.data.local.appPref.AppPref
 import com.raven.chaperone.services.remote.AccountsServices
 import com.raven.chaperone.services.remote.AuthServices
+import com.raven.chaperone.services.remote.FeedbackServices
 import com.raven.chaperone.services.remote.PaymentServices
 import com.raven.chaperone.services.remote.RequestsServices
 import com.raven.chaperone.services.remote.SearchServices
+import com.raven.chaperone.services.remote.WalksServices
 import com.raven.chaperone.utils.Constants
 import com.raven.chaperone.utils.HeaderInterceptor
 import dagger.Module
@@ -70,5 +72,18 @@ class ServiceModule {
     fun providePaymentServices(appPreferences: AppPref): PaymentServices =
         constructRetrofit(appPreferences)
             .create(PaymentServices::class.java)
+
+    @Singleton
+    @Provides
+    fun provideWalksServices(appPreferences: AppPref): WalksServices =
+        constructRetrofit(appPreferences)
+            .create(WalksServices::class.java)
+
+    @Singleton
+    @Provides
+    fun provideFeedbackServices(appPreferences: AppPref): FeedbackServices =
+        constructRetrofit(appPreferences)
+            .create(FeedbackServices::class.java)
+
 
 }

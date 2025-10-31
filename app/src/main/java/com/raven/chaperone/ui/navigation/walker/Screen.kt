@@ -17,5 +17,10 @@ sealed class Screen {
 
     data class PointLocation(val latLng: LatLng) : Screen()
 
-    data class WandererProfile(val wandererId: Int, val requestId: Int? = null):Screen()
+    data class WandererProfile(val wandererId: Int, val requestId: Int? = null) : Screen()
+
+    data class LocationSharingScreen(val roomId: Int) : Screen()
+
+    data class Feedback(val wandererId: Int) : Screen()
+
 }

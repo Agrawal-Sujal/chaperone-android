@@ -1,31 +1,41 @@
 package com.raven.chaperone.ui.screens.wanderer.walks.home
 
-import android.R.attr.order
-import android.content.Context
-import android.content.Intent
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raven.chaperone.domain.model.payment.CreateOrderRequest
 import com.raven.chaperone.domain.model.payment.CreateOrderResponse
-import com.raven.chaperone.payment.PaymentActivity
 import com.raven.chaperone.services.remote.PaymentServices
 import com.raven.chaperone.services.remote.RequestsServices
-import com.raven.chaperone.ui.screens.wanderer.explore.walkerProfile.RequestWalkState
+import com.raven.chaperone.services.remote.WalksServices
 import com.raven.chaperone.utils.Utils.parseResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlin.collections.filter
 
 sealed class WalksUiState {
     object Loading : WalksUiState()
-    data class Success(val requests: List<WalkRequest>) : WalksUiState()
+    data class Success(
+        val requests: List<WalkRequest> = emptyList(),
+        val walks: List<Walk> = emptyList()
+    ) : WalksUiState()
+
     data class Error(val message: String) : WalksUiState()
 }
+
+data class Walk(
+    val name: String,
+    val rating: Float,
+    val dateTime: String,
+    val location: String,
+    val roomId: Int,
+    val id: Int,
+    val lat: Double,
+    val long: Double
+)
 
 enum class WalkFilter {
     UPCOMING,
@@ -43,7 +53,8 @@ sealed class WithdrawState {
 @HiltViewModel
 class WalksHomeScreenViewModel @Inject constructor(
     val requestsServices: RequestsServices,
-    val paymentServices: PaymentServices
+    val paymentServices: PaymentServices,
+    val walksServices: WalksServices
 ) :
     ViewModel() {
     private val _uiState = MutableStateFlow<WalksUiState>(WalksUiState.Loading)
@@ -61,11 +72,85 @@ class WalksHomeScreenViewModel @Inject constructor(
     init {
         loadRequestSentWalks()
     }
-    fun showError(error:String?){
+
+    fun showError(error: String?) {
         _uiState.value = WalksUiState.Error(
             error ?: "Payment not completed"
         )
     }
+
+    fun loadUpcomingWalks() {
+        viewModelScope.launch {
+            val response = parseResponse(walksServices.getWandererScheduledWalks())
+            if (response.isFailed) {
+                val errorResponse = response.error
+                val error =
+                    if (errorResponse != null)
+                        errorResponse.detail ?: "Unknown error"
+                    else
+                        "Something went wrong"
+                _uiState.value = WalksUiState.Error(
+                    error ?: "Failed to load walks"
+                )
+
+            }
+            if (response.isSuccess) {
+                val data = response.data
+                if (data != null) {
+                    _uiState.value = WalksUiState.Success(walks = data.map {
+                        Walk(
+                            name = it.walker_name,
+                            rating = it.walker_rating.toFloat(),
+                            dateTime = it.date + it.time,
+                            location = it.start_location_name,
+                            roomId = it.room_id,
+                            id = it.id,
+                            lat = it.start_location_latitude,
+                            long = it.start_location_longitude
+                        )
+                    })
+                } else
+                    _uiState.value = WalksUiState.Error("Failed to load walks")
+            }
+        }
+    }
+    fun loadCompletedWalks() {
+        viewModelScope.launch {
+            val response = parseResponse(walksServices.getCompletedWandererWalks())
+
+            if (response.isFailed) {
+                val errorResponse = response.error
+                val error =
+                    if (errorResponse != null)
+                        errorResponse.detail ?: "Unknown error"
+                    else
+                        "Something went wrong"
+                _uiState.value = WalksUiState.Error(
+                    error ?: "Failed to load walks"
+                )
+
+            }
+            if (response.isSuccess) {
+                val data = response.data
+                if (data != null) {
+                    _uiState.value = WalksUiState.Success(walks = data.map {
+                        Walk(
+                            name = it.walker_name,
+                            rating = it.walker_rating.toFloat(),
+                            dateTime = it.date + it.time,
+                            location = it.start_location_name,
+                            roomId = it.room_id,
+                            id = it.id,
+                            lat = it.start_location_latitude,
+                            long = it.start_location_longitude
+                        )
+                    })
+                } else
+                    _uiState.value = WalksUiState.Error("Failed to load walks")
+            }
+        }
+    }
+
     fun loadRequestSentWalks() {
         viewModelScope.launch {
             _uiState.value = WalksUiState.Loading
@@ -109,11 +194,11 @@ class WalksHomeScreenViewModel @Inject constructor(
         when (filter) {
             WalkFilter.REQUEST_SENT -> loadRequestSentWalks()
             WalkFilter.UPCOMING -> {
-                // TODO: Implement upcoming walks
+                loadUpcomingWalks()
             }
 
             WalkFilter.COMPLETED -> {
-                // TODO: Implement completed walks
+                loadCompletedWalks()
             }
         }
     }
@@ -163,11 +248,12 @@ class WalksHomeScreenViewModel @Inject constructor(
         _withdrawState.value = WithdrawState.Idle
     }
 
-    fun onPayFee(requestId: Int,onSuccess:(CreateOrderResponse)-> Unit) {
+    fun onPayFee(requestId: Int, onSuccess: (CreateOrderResponse) -> Unit) {
         viewModelScope.launch {
             _uiState.value = WalksUiState.Loading
             try {
-                val response = parseResponse(paymentServices.createOrder(CreateOrderRequest(requestId)))
+                val response =
+                    parseResponse(paymentServices.createOrder(CreateOrderRequest(requestId)))
                 if (response.isFailed) {
                     val errorResponse = response.error
                     val error =

@@ -11,6 +11,8 @@ import com.raven.chaperone.ui.screens.onboarding.SplashScreen
 import com.raven.chaperone.ui.screens.onboarding.signin.SignInScreen
 import com.raven.chaperone.ui.screens.onboarding.signup.SignUpScreen
 import com.raven.chaperone.ui.screens.onboarding.WandererQuestionScreen
+import com.raven.chaperone.ui.screens.walker.feedback.FeedbackScreen
+import com.raven.chaperone.ui.screens.wanderer.locationSharing.LocationSharingScreen
 
 @Composable
 fun AppNavDisplay() {
@@ -37,7 +39,7 @@ fun AppNavDisplay() {
 
             entry<Screen.WandererQuestions> {
                 WandererQuestionScreen(onSubmitClick = {
-                    backstack.add(Screen.WandererQuestions(it.page+1))
+                    backstack.add(Screen.WandererQuestions(it.page + 1))
                 })
             }
 

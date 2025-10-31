@@ -19,16 +19,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.raven.chaperone.ui.navigation.wanderer.Screen
 import com.raven.chaperone.ui.screens.commonComponents.maps.MapSearchScreen
 import com.raven.chaperone.ui.screens.payment.PaymentDetailScreen
 import com.raven.chaperone.ui.screens.wanderer.explore.search.SearchPageScreen
 import com.raven.chaperone.ui.screens.wanderer.explore.searchResult.SearchResultScreen
 import com.raven.chaperone.ui.screens.wanderer.explore.walkerProfile.WalkerInfoScreen
+import com.raven.chaperone.ui.screens.wanderer.feedback.FeedbackScreen
 import com.raven.chaperone.ui.screens.wanderer.home.HomeScreen
+import com.raven.chaperone.ui.screens.wanderer.locationSharing.LocationSharingScreen
 import com.raven.chaperone.ui.screens.wanderer.walks.home.WalksHomeScreen
 import com.raven.chaperone.ui.theme.lightPurple
-import com.raven.chaperone.ui.theme.mediumPurple
 import com.raven.chaperone.ui.theme.textPurple
 
 
@@ -131,6 +131,13 @@ fun AppNavDisplay() {
                         backstack.add(Screen.WalkerInfo(null, it))
                     }, goToPaymentDetailScreen = {
                         backstack.add(Screen.PaymentDetailScreen(it))
+                    }, trackLocation = {
+                        backstack.add(Screen.LocationSharingScreen(it))
+                    })
+                }
+                entry<Screen.LocationSharingScreen> {
+                    LocationSharingScreen(it.roomId, goToWalkerFeedBackScreen = { walkerId ->
+                        backstack.add(Screen.Feedback(walkerId))
                     })
                 }
                 entry<Screen.HomeScreen> {
@@ -138,6 +145,13 @@ fun AppNavDisplay() {
                 }
                 entry<Screen.PaymentDetailScreen> {
                     PaymentDetailScreen(paymentId = it.paymentId)
+                }
+
+                entry<Screen.Feedback> {
+                    FeedbackScreen(it.walkerId, goBack = {
+                        backstack.clear()
+                        backstack.add(Screen.ExplorePage())
+                    })
                 }
             }
         )

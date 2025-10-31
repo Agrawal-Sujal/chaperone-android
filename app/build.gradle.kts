@@ -118,5 +118,8 @@ dependencies {
 
     implementation("androidx.appcompat:appcompat:1.7.1")
 
+    implementation("org.java-websocket:Java-WebSocket:1.6.0")
+
+
 
 }

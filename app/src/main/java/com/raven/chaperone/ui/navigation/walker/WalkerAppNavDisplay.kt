@@ -21,7 +21,10 @@ import androidx.navigation3.ui.NavDisplay
 import com.raven.chaperone.ui.screens.commonComponents.maps.MapSearchScreen
 import com.raven.chaperone.ui.screens.commonComponents.maps.PointLocationMap
 import com.raven.chaperone.ui.screens.walker.explore.ExploreScreen
+import com.raven.chaperone.ui.screens.walker.feedback.FeedbackScreen
 import com.raven.chaperone.ui.screens.walker.home.HomeScreen
+import com.raven.chaperone.ui.screens.walker.locationSharing.LocationSharingScreen
+import com.raven.chaperone.ui.screens.walker.walks.WalksScreen
 import com.raven.chaperone.ui.screens.walker.wandererProfile.WandererProfileScreen
 import com.raven.chaperone.ui.theme.lightPurple
 import com.raven.chaperone.ui.theme.textPurple
@@ -89,9 +92,16 @@ fun WalkerAppNavDisplay() {
                 }
 
                 entry<Screen.WalksHomeScreen> {
-
+                    WalksScreen(trackLocation = {
+                        backstack.add(Screen.LocationSharingScreen(it))
+                    })
                 }
 
+                entry<Screen.LocationSharingScreen> {
+                    LocationSharingScreen(it.roomId, goToWandererFeedBackScreen = { wandererId ->
+                        backstack.add(Screen.Feedback(wandererId))
+                    })
+                }
                 entry<Screen.WandererProfile> {
                     WandererProfileScreen(
                         onBackClick = {
@@ -122,6 +132,13 @@ fun WalkerAppNavDisplay() {
 
                 entry<Screen.PointLocation> {
                     PointLocationMap(it.latLng)
+                }
+
+                entry<Screen.Feedback> {
+                    FeedbackScreen(it.wandererId, goBack = {
+                        backstack.clear()
+                        backstack.add(Screen.ExplorePage)
+                    })
                 }
             }
         )

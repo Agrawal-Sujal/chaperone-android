@@ -4,5 +4,6 @@
         <domain includeSubdomains="true">10.0.2.2</domain>
         <domain includeSubdomains="true">10.44.155.82</domain>
         <domain includeSubdomains="true">10.98.31.82</domain>
+        <domain includeSubdomains = "true">193.181.211.55</domain>
     </domain-config>
 </network-security-config>

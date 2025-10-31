@@ -400,7 +400,7 @@ fun WandererReasonsScreen(state: OnboardingState, viewModel: ExtraInfoViewModel)
 @Composable
 fun WalkerDetailsScreen(state: OnboardingState, viewModel: ExtraInfoViewModel) {
     val languages = listOf("Hindi", "English", "Tamil", "Telugu", "French")
-    val genders = listOf("Male", "Female", "Prefer Not to Say", "Other")
+    val genders = listOf("Male", "Female")
 
     Column(
         modifier = Modifier
@@ -413,34 +413,6 @@ fun WalkerDetailsScreen(state: OnboardingState, viewModel: ExtraInfoViewModel) {
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold
         )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Photo Upload
-        Text(text = "Upload Circular Photo", fontWeight = FontWeight.Medium)
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp)
-                .border(
-                    2.dp,
-                    if (state.photoUploaded) Color.Green else Color.LightGray,
-                    RoundedCornerShape(12.dp)
-                )
-                .clickable { viewModel.onEvent(OnboardingEvent.UploadPhoto) },
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                if (state.photoUploaded) {
-                    Text("✓", fontSize = 32.sp, color = Color.Green)
-                    Text("Uploaded", color = Color.Gray, fontSize = 12.sp)
-                } else {
-                    Text("Click to upload", color = Color.Gray)
-                }
-            }
-        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
