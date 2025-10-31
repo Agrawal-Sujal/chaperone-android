@@ -13,10 +13,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.Upcoming
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
@@ -24,6 +29,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -33,16 +39,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.google.android.gms.maps.model.LatLng
+import com.raven.chaperone.ui.screens.wanderer.walks.home.WalkFilter
 import com.raven.chaperone.ui.theme.lightPurple
 import com.raven.chaperone.ui.theme.textPurple
 import com.raven.chaperone.ui.theme.whiteBG
 
 @Composable
-fun ExploreScreen(viewModel: ExploreScreenViewModel = hiltViewModel(), goToWandererProfile:(Int, Int)->Unit, goToMap:(LatLng)-> Unit) {
+fun ExploreScreen(
+    viewModel: ExploreScreenViewModel = hiltViewModel(),
+    goToWandererProfile: (Int, Int) -> Unit,
+    goToMap: (LatLng) -> Unit
+) {
     val state by viewModel.uiState.collectAsState()
 
     Column(
@@ -78,12 +90,14 @@ fun ExploreScreen(viewModel: ExploreScreenViewModel = hiltViewModel(), goToWande
 
             is RequestUiState.Success -> {
                 val requests = (state as RequestUiState.Success).requests
-                LazyColumn(
+                if (requests.isEmpty()) {
+                    EmptyRequestsContent(selectedFilter = WalkFilter.REQUEST_SENT)
+                } else LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     contentPadding = PaddingValues(bottom = 16.dp)
                 ) {
                     items(requests) { request ->
-                        WalkingRequestCard(request,goToWandererProfile,goToMap)
+                        WalkingRequestCard(request, goToWandererProfile, goToMap)
                     }
                 }
             }
@@ -92,7 +106,79 @@ fun ExploreScreen(viewModel: ExploreScreenViewModel = hiltViewModel(), goToWande
 }
 
 @Composable
-fun WalkingRequestCard(request: WalkPendingRequest, goToWandererProfile:(Int, Int)->Unit, goToMap:(LatLng)-> Unit) {
+fun EmptyRequestsContent(selectedFilter: WalkFilter) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            when (selectedFilter) {
+                WalkFilter.UPCOMING -> {
+                    Icon(
+                        imageVector = Icons.Default.Upcoming,
+                        contentDescription = null,
+                        tint = Color.LightGray,
+                        modifier = Modifier.size(80.dp)
+                    )
+
+                }
+
+                WalkFilter.COMPLETED -> {
+                    Icon(
+                        imageVector = Icons.Default.People,
+                        contentDescription = null,
+                        tint = Color.LightGray,
+                        modifier = Modifier.size(80.dp)
+                    )
+
+                }
+
+                WalkFilter.REQUEST_SENT -> {
+                    Icon(
+                        imageVector = Icons.Default.Send,
+                        contentDescription = null,
+                        tint = Color.LightGray,
+                        modifier = Modifier.size(80.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = when (selectedFilter) {
+                    WalkFilter.UPCOMING -> "No upcoming walks"
+                    WalkFilter.COMPLETED -> "No completed walks"
+                    WalkFilter.REQUEST_SENT -> "No Pending Requests"
+                },
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF333333)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = when (selectedFilter) {
+                    WalkFilter.UPCOMING -> "You don't have any scheduled walks"
+                    WalkFilter.COMPLETED -> "You haven't completed any walks yet"
+                    WalkFilter.REQUEST_SENT -> "You don't have any pending request"
+                },
+                fontSize = 14.sp,
+                color = Color.Gray,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+fun WalkingRequestCard(
+    request: WalkPendingRequest,
+    goToWandererProfile: (Int, Int) -> Unit,
+    goToMap: (LatLng) -> Unit
+) {
     val context = LocalContext.current
 
     Card(
@@ -148,7 +234,7 @@ fun WalkingRequestCard(request: WalkPendingRequest, goToWandererProfile:(Int, In
             ) {
                 Button(
                     onClick = {
-                        goToMap(LatLng(request.loc_lat,request.loc_long))
+                        goToMap(LatLng(request.loc_lat, request.loc_long))
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = textPurple),
                     shape = RoundedCornerShape(12.dp),
@@ -160,7 +246,7 @@ fun WalkingRequestCard(request: WalkPendingRequest, goToWandererProfile:(Int, In
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Button(
-                    onClick = {goToWandererProfile(request.id,request.wanderer_id) },
+                    onClick = { goToWandererProfile(request.id, request.wanderer_id) },
                     colors = ButtonDefaults.buttonColors(containerColor = textPurple),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.weight(1f)

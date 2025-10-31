@@ -19,4 +19,8 @@ sealed class Screen {
     object HomeScreen : Screen()
 
     data class PaymentDetailScreen(val paymentId: Int) : Screen()
+
+    data class LocationSharingScreen(val roomId: Int) : Screen()
+
+    data class Feedback(val walkerId: Int) : Screen()
 }

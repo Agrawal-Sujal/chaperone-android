@@ -35,7 +35,8 @@ import com.raven.chaperone.ui.theme.textPurple
 fun WalksHomeScreen(
     viewModel: WalksHomeScreenViewModel = hiltViewModel(),
     onNavigateToProfile: (Int) -> Unit,
-    goToPaymentDetailScreen:(Int)->Unit
+    goToPaymentDetailScreen: (Int) -> Unit,
+    trackLocation: (Int) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val selectedFilter by viewModel.selectedFilter.collectAsState()
@@ -52,6 +53,7 @@ fun WalksHomeScreen(
                 viewModel.loadRequestSentWalks()
                 goToPaymentDetailScreen(paymentId!!.toInt())
             }
+
             Activity.RESULT_CANCELED -> {
                 val error = result.data?.getStringExtra("error")
                 viewModel.showError(error)
@@ -79,35 +81,73 @@ fun WalksHomeScreen(
             }
 
             is WalksUiState.Error -> {
-                ErrorContent(
-                    message = state.message,
-                    onRetry = { viewModel.loadRequestSentWalks() }
-                )
+                if (selectedFilter == WalkFilter.REQUEST_SENT)
+                    ErrorContent(
+                        message = state.message,
+                        onRetry = { viewModel.loadRequestSentWalks() }
+                    )
+                else {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(state.message, color = MaterialTheme.colorScheme.error)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(onClick = {
+                                if (selectedFilter == WalkFilter.UPCOMING)
+                                    viewModel.loadUpcomingWalks() else viewModel.loadCompletedWalks()
+                            }) {
+                                Text("Retry")
+                            }
+                        }
+                    }
+                }
             }
 
             is WalksUiState.Success -> {
-                if (state.requests.isEmpty()) {
-                    EmptyRequestsContent()
-                } else {
-                    RequestSentList(
-                        requests = state.requests,
-                        withdrawState = withdrawState,
-                        onViewProfile = onNavigateToProfile,
-                        onWithdraw = { viewModel.withdrawRequest(it) },
-                        onPayFees = { requestId ->
-                            viewModel.onPayFee(requestId){order->
+                if (selectedFilter == WalkFilter.REQUEST_SENT) {
+                    if (state.requests.isEmpty()) {
+                        EmptyRequestsContent(selectedFilter)
+                    } else {
 
-                                val intent = Intent(context, PaymentActivity::class.java).apply {
-                                    putExtra("id",order.id)
-                                    putExtra("order_id", order.order_id)
-                                    putExtra("key", order.key)
-                                    putExtra("amount", order.amount)
-                                    putExtra("currency", order.currency)
+                        RequestSentList(
+                            requests = state.requests,
+                            withdrawState = withdrawState,
+                            onViewProfile = onNavigateToProfile,
+                            onWithdraw = { viewModel.withdrawRequest(it) },
+                            onPayFees = { requestId ->
+                                viewModel.onPayFee(requestId) { order ->
+
+                                    val intent =
+                                        Intent(context, PaymentActivity::class.java).apply {
+                                            putExtra("id", order.id)
+                                            putExtra("order_id", order.order_id)
+                                            putExtra("key", order.key)
+                                            putExtra("amount", order.amount)
+                                            putExtra("currency", order.currency)
+                                        }
+                                    launcher.launch(intent)
                                 }
-                                launcher.launch(intent)
+                            }
+                        )
+
+                    }
+                } else {
+                    if (state.walks.isEmpty()) {
+                        EmptyRequestsContent(selectedFilter)
+                    } else {
+                        LazyColumn {
+                            items(state.walks.size) { index ->
+                                WalkCard(
+                                    walk = state.walks[index],
+                                    isCompleted = selectedFilter == WalkFilter.COMPLETED,
+                                    trackLocation
+                                )
                             }
                         }
-                    )
+
+                    }
                 }
             }
         }
@@ -130,6 +170,51 @@ fun WalksHomeScreen(
         }
 
         else -> {}
+    }
+}
+
+@Composable
+fun WalkCard(walk: Walk, isCompleted: Boolean, trackLocation: (Int) -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column {
+                    Text(walk.name, fontWeight = FontWeight.Bold)
+                    Text("${walk.rating}/5 ⭐")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text("📅 ${walk.dateTime}")
+            Text("📍 ${walk.location}")
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (isCompleted) {
+
+            } else {
+
+                Button(
+                    onClick = { trackLocation(walk.roomId) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Track Location")
+                }
+            }
+
+
+        }
     }
 }
 
@@ -314,7 +399,7 @@ fun ErrorContent(
 }
 
 @Composable
-fun EmptyRequestsContent() {
+fun EmptyRequestsContent(selectedFilter: WalkFilter) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -324,22 +409,55 @@ fun EmptyRequestsContent() {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
-                imageVector = Icons.Default.Send,
-                contentDescription = null,
-                tint = Color.LightGray,
-                modifier = Modifier.size(80.dp)
-            )
+            when (selectedFilter) {
+                WalkFilter.UPCOMING -> {
+                    Icon(
+                        imageVector = Icons.Default.Upcoming,
+                        contentDescription = null,
+                        tint = Color.LightGray,
+                        modifier = Modifier.size(80.dp)
+                    )
+
+                }
+
+                WalkFilter.COMPLETED -> {
+                    Icon(
+                        imageVector = Icons.Default.People,
+                        contentDescription = null,
+                        tint = Color.LightGray,
+                        modifier = Modifier.size(80.dp)
+                    )
+
+                }
+
+                WalkFilter.REQUEST_SENT -> {
+                    Icon(
+                        imageVector = Icons.Default.Send,
+                        contentDescription = null,
+                        tint = Color.LightGray,
+                        modifier = Modifier.size(80.dp)
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "No Requests Sent",
+                text = when (selectedFilter) {
+                    WalkFilter.UPCOMING -> "No upcoming walks"
+                    WalkFilter.COMPLETED -> "No completed walks"
+                    WalkFilter.REQUEST_SENT -> "No Requests Sent"
+                },
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF333333)
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "You haven't sent any walk requests yet",
+                text = when (selectedFilter) {
+                    WalkFilter.UPCOMING -> "You don't have any scheduled walks"
+                    WalkFilter.COMPLETED -> "You haven't completed any walks yet"
+                    WalkFilter.REQUEST_SENT -> "You haven't sent any walk requests yet"
+                },
                 fontSize = 14.sp,
                 color = Color.Gray,
                 textAlign = TextAlign.Center
