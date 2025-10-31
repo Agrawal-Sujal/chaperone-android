@@ -82,6 +82,13 @@ A portion of every Wanderer's payment goes directly to a charity of their choice
 
 A key challenge in a peer-to-peer marketplace is balancing supply and demand. To prevent a surplus of Walkers and ensure only dedicated companions remain active, we implemented a Walker subscription model after a successful free trial. This nominal fee creates a higher-quality, more reliable network for Wanderers.
 
+
+## 📺 Hackathon Presentation & Demo
+
+* **View our Video Demo:** [Click Here](https://youtu.be/bj_RXoO1E8M)
+* **See our Pitch Deck:** [Click Here](https://drive.google.com/file/d/1lqdZnqsJPeqN9S1xzgTR6eyYoBOe6Mnd/view?usp=sharing)
+
+
 ## 🛠️ Technology Stack
 
 Chaperone is built with a modern, high-performance tech stack.
