@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
+import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
@@ -39,7 +40,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @Composable
-fun PaymentDetailScreen(viewModel: PaymentDetailViewModel = hiltViewModel(),paymentId: Int){
+fun PaymentDetailScreen(
+    viewModel: PaymentDetailViewModel = hiltViewModel(),
+    paymentId: Int,
+    goToWalker: () -> Unit
+) {
     val state by viewModel.uiState.collectAsState()
 
     LaunchedEffect(paymentId) {
@@ -59,11 +64,13 @@ fun PaymentDetailScreen(viewModel: PaymentDetailViewModel = hiltViewModel(),paym
                 .padding(vertical = 16.dp, horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Back",
-                tint = Color.White
-            )
+            IconButton(onClick = { goToWalker() }) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.White
+                )
+            }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = "Payment",
@@ -79,7 +86,8 @@ fun PaymentDetailScreen(viewModel: PaymentDetailViewModel = hiltViewModel(),paym
                 message = state.errorMessage ?: "Something went wrong.",
                 onRetry = { viewModel.retryPayment(paymentId = paymentId) }
             )
-            state.isSuccess -> PaymentSuccessView(state)
+
+            state.isSuccess -> PaymentSuccessView(state, goToWalker)
         }
     }
 }
@@ -95,7 +103,7 @@ fun LoadingView() {
 }
 
 @Composable
-fun PaymentSuccessView(state: PaymentUiState) {
+fun PaymentSuccessView(state: PaymentUiState, goToWalker: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -164,7 +172,7 @@ fun PaymentSuccessView(state: PaymentUiState) {
         Spacer(modifier = Modifier.height(28.dp))
 
         Button(
-            onClick = { /* TODO: Navigate to Walk Details */ },
+            onClick = { goToWalker() },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4B006E)),
             modifier = Modifier
                 .fillMaxWidth()

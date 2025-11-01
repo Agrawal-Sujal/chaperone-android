@@ -14,13 +14,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -43,9 +49,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.raven.chaperone.ui.screens.commonComponents.CustomProgressBar
 import com.raven.chaperone.ui.screens.wanderer.explore.walkerProfile.WalkerInfoHeader
+import com.raven.chaperone.ui.screens.wanderer.walks.home.formatDateTime
 import com.raven.chaperone.ui.theme.lightGray
 import com.raven.chaperone.ui.theme.textGray
 import com.raven.chaperone.ui.theme.textPurple
@@ -76,12 +84,12 @@ fun SearchResultScreen(
     searchData: SearchData,
     viewModel: SearchResultViewModel = hiltViewModel(),
     onViewProfileClick: (WalkerProfileView) -> Unit,
-    onBackClick:()-> Unit
+    onBackClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.fetchWalkers(searchData.lat,searchData.log)
+        viewModel.fetchWalkers(searchData.lat, searchData.log)
     }
     Box(
         modifier = Modifier
@@ -171,13 +179,17 @@ fun ErrorSection(message: String, onRetry: () -> Unit) {
 @Composable
 fun LocationHeader(searchData: SearchData) {
     Card(
-        modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth(),
+        modifier = Modifier
+            .padding(horizontal = 20.dp)
+            .fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, lightGray)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp).fillMaxWidth(),
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column {
@@ -193,45 +205,91 @@ fun LocationHeader(searchData: SearchData) {
 
 @Composable
 fun WalkerCard(walker: Walker, onViewProfileClick: (Int) -> Unit) {
+
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, lightGray)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Image(
-                painter = rememberAsyncImagePainter(walker.photoUrl),
-                contentDescription = walker.name,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(220.dp)
-                    .clip(RoundedCornerShape(12.dp))
-            )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AsyncImage(
+                    model = walker.photoUrl ?: "https://via.placeholder.com/150",
+                    contentDescription = "Walker Photo",
+                    modifier = Modifier
+                        .size(60.dp)
+                        .clip(CircleShape)
+                        .border(2.dp, Color.LightGray, CircleShape),
+                    contentScale = ContentScale.Crop
+                )
 
-            Spacer(Modifier.height(12.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
-            Text(
-                text = walker.name,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = textPurple
-            )
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = walker.name ?: "Unknown",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = textPurple
+                        )
+                    }
 
-            RatingRow(rating = walker.rating)
+                    walker.rating?.let { rating ->
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = String.format("%.1f/5", rating),
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Row {
+                                repeat(5) { index ->
+                                    Icon(
+                                        imageVector = Icons.Default.Star,
+                                        contentDescription = null,
+                                        tint = if (index < rating.toInt()) Color(0xFFFFC107) else Color.LightGray,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+//                    RatingRow(rating = walker.rating)
 
-            Text(
-                text = walker.about,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                fontSize = 14.sp,
-                color = textGray
-            )
+                }
+            }
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    tint = textPurple,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = walker.about,
+                    fontSize = 15.sp,
+                    color = Color(0xFF333333)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
             Button(
                 onClick = { onViewProfileClick(walker.id) },
                 modifier = Modifier
@@ -244,8 +302,64 @@ fun WalkerCard(walker: Walker, onViewProfileClick: (Int) -> Unit) {
             ) {
                 Text("View Profile", color = Color.White)
             }
+
         }
     }
+
+
+//    Card(
+//        modifier = Modifier.fillMaxWidth(),
+//        shape = RoundedCornerShape(16.dp),
+//        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+//        colors = CardDefaults.cardColors(containerColor = Color.White),
+//        border = BorderStroke(1.dp, lightGray)
+//    ) {
+//        Column(modifier = Modifier.padding(16.dp)) {
+//            Image(
+//                painter = rememberAsyncImagePainter(walker.photoUrl),
+//                contentDescription = walker.name,
+//                contentScale = ContentScale.Crop,
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .height(220.dp)
+//                    .clip(RoundedCornerShape(12.dp))
+//            )
+//
+//            Spacer(Modifier.height(12.dp))
+//
+//            Text(
+//                text = walker.name,
+//                fontWeight = FontWeight.Bold,
+//                fontSize = 18.sp,
+//                color = textPurple
+//            )
+//
+//            RatingRow(rating = walker.rating)
+//
+//            Text(
+//                text = walker.about,
+//                maxLines = 2,
+//                overflow = TextOverflow.Ellipsis,
+//                fontSize = 14.sp,
+//                color = textGray
+//            )
+//
+//            Spacer(Modifier.height(8.dp))
+//
+//            Button(
+//                onClick = { onViewProfileClick(walker.id) },
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .height(48.dp),
+//                shape = RoundedCornerShape(12.dp),
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = textPurple
+//                )
+//            ) {
+//                Text("View Profile", color = Color.White)
+//            }
+//        }
+//    }
 }
 
 @Composable
@@ -255,7 +369,7 @@ fun RatingRow(rating: Float) {
         Spacer(Modifier.width(6.dp))
         repeat(5) { index ->
             val star = if (index < rating.toInt()) "★" else "☆"
-            Text(text = star, color = if(index<rating.toInt()) Color.Yellow else lightGray)
+            Text(text = star, color = if (index < rating.toInt()) Color.Yellow else lightGray)
         }
     }
 }

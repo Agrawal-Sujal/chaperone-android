@@ -137,14 +137,22 @@ fun AppNavDisplay() {
                 }
                 entry<Screen.LocationSharingScreen> {
                     LocationSharingScreen(it.roomId, goToWalkerFeedBackScreen = { walkerId ->
+                        backstack.removeLastOrNull()
                         backstack.add(Screen.Feedback(walkerId))
                     })
                 }
                 entry<Screen.HomeScreen> {
-                    HomeScreen()
+                    HomeScreen(
+                        goToWalkScreen = {
+                            backstack.clear()
+                            backstack.add(Screen.WalksHomeScreen)
+                        }
+                    )
                 }
                 entry<Screen.PaymentDetailScreen> {
-                    PaymentDetailScreen(paymentId = it.paymentId)
+                    PaymentDetailScreen(paymentId = it.paymentId, goToWalker = {
+                        backstack.removeLastOrNull()
+                    })
                 }
 
                 entry<Screen.Feedback> {

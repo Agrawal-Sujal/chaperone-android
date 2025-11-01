@@ -14,6 +14,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.Payment
+import androidx.compose.material.icons.filled.PendingActions
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Upcoming
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -38,6 +45,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.google.android.gms.maps.model.LatLng
+import com.raven.chaperone.ui.screens.wanderer.home.EarningsCard
+import com.raven.chaperone.ui.screens.wanderer.home.ReferAFriendSection
+import com.raven.chaperone.ui.screens.wanderer.home.UpdateProfileButton
 import com.raven.chaperone.ui.theme.mediumPurple
 import com.raven.chaperone.ui.theme.textPurple
 
@@ -47,7 +57,9 @@ fun HomeScreen(
     viewModel: HomeScreenViewModel = hiltViewModel(),
     goToMapScreen: (LatLng?, String?) -> Unit,
     selectedLocation: LatLng?,
-    locationName: String?
+    locationName: String?,
+    goToExploreScreen: () -> Unit,
+    goToWalksScreen: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
     LaunchedEffect(selectedLocation) {
@@ -76,7 +88,7 @@ fun HomeScreen(
         }
 
         else -> {
-            DashboardContent(state, viewModel, goToMapScreen)
+            DashboardContent(state, viewModel, goToMapScreen, goToExploreScreen, goToWalksScreen)
         }
     }
 }
@@ -86,7 +98,9 @@ fun HomeScreen(
 fun DashboardContent(
     state: DashboardUiState,
     viewModel: HomeScreenViewModel,
-    goToMapScreen: (LatLng?, String?) -> Unit
+    goToMapScreen: (LatLng?, String?) -> Unit,
+    goToExploreScreen: () -> Unit,
+    goToWalksScreen: () -> Unit
 ) {
     val scroll = rememberScrollState()
 
@@ -170,37 +184,47 @@ fun DashboardContent(
         Text("Your Performance Overview", fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(8.dp))
 
-        InfoCard("₹ ${state.earnings}", "Earnings This Week")
-        InfoCard("${state.walksCompleted}", "Walks Completed This Week")
-        InfoCard("${state.rating}/5", "Current Companion Rating")
+//        InfoCard("₹ ${state.earnings}", "Earnings This Week")
+//        InfoCard("${state.walksCompleted}", "Walks Completed This Week")
+//        InfoCard("${state.rating}/5", "Current Companion Rating")
+        EarningsCard(Icons.Default.AttachMoney, "Earnings This Week", "₹ ${state.earnings}")
+        EarningsCard(
+            Icons.Default.People,
+            "Walks Completed This Week",
+            state.walksCompleted.toString()
+        )
+        EarningsCard(Icons.Default.Star, "Current Companion Rating", "${state.rating}/5")
 
         Spacer(Modifier.height(8.dp))
 
-        Button(
-            onClick = { },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = textPurple)
-        ) {
-            Text("Update Profile Details", color = Color.White)
-        }
+
+//        Button(
+//            onClick = { },
+//            modifier = Modifier.fillMaxWidth(),
+//            colors = ButtonDefaults.buttonColors(containerColor = mediumPurple)
+//        ) {
+//            Text("Scheduled Walks", color = textPurple)
+//        }
+        UpdateProfileButton({ goToWalksScreen() }, Icons.Default.Upcoming, "Scheduled Walks")
 
         Spacer(Modifier.height(8.dp))
-        Button(
-            onClick = { },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = mediumPurple)
-        ) {
-            Text("Scheduled Walks", color = textPurple)
-        }
+//        Button(
+//            onClick = { },
+//            modifier = Modifier.fillMaxWidth(),
+//            colors = ButtonDefaults.buttonColors(containerColor = mediumPurple)
+//        ) {
+//            Text("Pending Requests", color = textPurple)
+//        }
+        UpdateProfileButton(
+            { goToExploreScreen() },
+            Icons.Default.PendingActions,
+            "Pending Requests"
+        )
 
         Spacer(Modifier.height(8.dp))
-        Button(
-            onClick = { },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = mediumPurple)
-        ) {
-            Text("Pending Requests", color = textPurple)
-        }
+
+        ReferAFriendSection()
+
     }
 }
 

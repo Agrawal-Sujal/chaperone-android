@@ -229,17 +229,19 @@ fun LocationSharingScreen(
                     Button(
                         onClick = {
                             val wandererId = viewModel.roomInfo.wandererId
-                            if (sharingLocation) {
-                                viewModel.toggleShareLocation()
-                                goToWandererFeedBackScreen(wandererId)
-                            } else {
-                                goToWandererFeedBackScreen(wandererId)
+                            viewModel.completeWalk() {
+                                if (sharingLocation) {
+                                    viewModel.toggleShareLocation()
+                                    goToWandererFeedBackScreen(wandererId)
+                                } else {
+                                    goToWandererFeedBackScreen(wandererId)
+                                }
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
                     ) {
-                        Text(" Walk Completed", color = Color.White)
+                        Text("Walk Completed", color = Color.White)
                     }
                 }
             }

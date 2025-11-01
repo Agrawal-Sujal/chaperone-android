@@ -2,6 +2,7 @@ package com.raven.chaperone.ui.screens.wanderer.walks.home
 
 import android.app.Activity
 import android.content.Intent
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -56,6 +57,7 @@ fun WalksHomeScreen(
 
             Activity.RESULT_CANCELED -> {
                 val error = result.data?.getStringExtra("error")
+                Log.d("Payment Error", error.toString())
                 viewModel.showError(error)
 
             }
@@ -64,7 +66,6 @@ fun WalksHomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFAF9F6))
     ) {
         // Filter Dropdown
         FilterDropdown(
@@ -175,44 +176,171 @@ fun WalksHomeScreen(
 
 @Composable
 fun WalkCard(walk: Walk, isCompleted: Boolean, trackLocation: (Int) -> Unit) {
+//    Card(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(vertical = 8.dp),
+//        shape = RoundedCornerShape(12.dp),
+//        elevation = CardDefaults.cardElevation(4.dp)
+//    ) {
+//        Column(modifier = Modifier.padding(16.dp)) {
+//            Row(
+//                horizontalArrangement = Arrangement.SpaceBetween,
+//                modifier = Modifier.fillMaxWidth()
+//            ) {
+//                Column {
+//                    Text(walk.name, fontWeight = FontWeight.Bold)
+//                    Text("${walk.rating}/5 ⭐")
+//                }
+//            }
+//
+//            Spacer(modifier = Modifier.height(12.dp))
+//
+//            Text("📅 ${walk.dateTime}")
+//            Text("📍 ${walk.location}")
+//
+//            Spacer(modifier = Modifier.height(16.dp))
+//
+//            if (isCompleted) {
+//
+//            } else {
+//
+//                Button(
+//                    onClick = { trackLocation(walk.roomId) },
+//                    modifier = Modifier.fillMaxWidth(),
+//                    shape = RoundedCornerShape(8.dp)
+//                ) {
+//                    Text("Track Location")
+//                }
+//            }
+//
+//
+//        }
+//    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
             Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    Text(walk.name, fontWeight = FontWeight.Bold)
-                    Text("${walk.rating}/5 ⭐")
+                AsyncImage(
+                    model = "xyz",
+                    contentDescription = "Walker Photo",
+                    modifier = Modifier
+                        .size(60.dp)
+                        .clip(CircleShape)
+                        .border(2.dp, Color.LightGray, CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = walk.name ?: "Unknown",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = textPurple
+                        )
+                    }
+
+                    walk.rating?.let { rating ->
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = String.format("%.1f/5", rating),
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Row {
+                                repeat(5) { index ->
+                                    Icon(
+                                        imageVector = Icons.Default.Star,
+                                        contentDescription = null,
+                                        tint = if (index < rating.toInt()) Color(0xFFFFC107) else Color.LightGray,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+//                    RatingRow(rating = walker.rating)
+
                 }
             }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text("📅 ${walk.dateTime}")
-            Text("📍 ${walk.location}")
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (isCompleted) {
 
-            } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.DateRange,
+                    contentDescription = null,
+                    tint = textPurple,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = walk.dateTime,
+                    fontSize = 15.sp,
+                    color = Color(0xFF333333)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = null,
+                    tint = textPurple,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = walk.location,
+                    fontSize = 15.sp,
+                    color = Color(0xFF333333)
+                )
+            }
+
+            if (!isCompleted) {
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Button(
                     onClick = { trackLocation(walk.roomId) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = textPurple
+                    )
                 ) {
-                    Text("Track Location")
+                    Text("Track Location", color = Color.White)
                 }
             }
-
 
         }
     }
@@ -227,12 +355,12 @@ fun FilterDropdown(
 ) {
     Box(
         modifier = Modifier
-            .fillMaxWidth()
+//            .fillMaxWidth()
             .padding(16.dp)
     ) {
         Card(
             modifier = Modifier
-                .fillMaxWidth()
+//                .fillMaxWidth()
                 .clickable { onToggleMenu() },
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -240,7 +368,7 @@ fun FilterDropdown(
         ) {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
+//                    .fillMaxWidth()
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -267,7 +395,7 @@ fun FilterDropdown(
             expanded = showMenu,
             onDismissRequest = { onToggleMenu() },
             modifier = Modifier
-                .fillMaxWidth(0.92f)
+//                .fillMaxWidth(0.92f)
                 .background(Color.White, RoundedCornerShape(12.dp))
         ) {
             FilterMenuItem(

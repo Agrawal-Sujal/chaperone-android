@@ -99,6 +99,7 @@ fun WalkerAppNavDisplay() {
 
                 entry<Screen.LocationSharingScreen> {
                     LocationSharingScreen(it.roomId, goToWandererFeedBackScreen = { wandererId ->
+                        backstack.removeLastOrNull()
                         backstack.add(Screen.Feedback(wandererId))
                     })
                 }
@@ -125,9 +126,19 @@ fun WalkerAppNavDisplay() {
                 }
 
                 entry<Screen.HomeScreen> {
-                    HomeScreen(goToMapScreen = { latLng, name ->
-                        backstack.add(Screen.MapScreen(latLng, name))
-                    }, selectedLocation = it.selectedLocation, locationName = it.locationName)
+                    HomeScreen(
+                        goToMapScreen = { latLng, name ->
+                            backstack.add(Screen.MapScreen(latLng, name))
+                        }, selectedLocation = it.selectedLocation, locationName = it.locationName,
+                        goToExploreScreen = {
+                            backstack.clear()
+                            backstack.add(Screen.ExplorePage)
+                        },
+                        goToWalksScreen = {
+                            backstack.clear()
+                            backstack.add(Screen.WalksHomeScreen)
+                        }
+                    )
                 }
 
                 entry<Screen.PointLocation> {

@@ -5,6 +5,7 @@ import android.app.TimePickerDialog
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -54,7 +55,7 @@ import java.util.Calendar
 fun SearchPageScreen(
     viewModel: SearchPageViewModel = hiltViewModel(),
     goToResultScreen: (SearchData) -> Unit,
-    goToMapScreen: (LatLng?,String?) -> Unit,
+    goToMapScreen: (LatLng?, String?) -> Unit,
     selectedLocation: LatLng?,
     locationName: String?
 ) {
@@ -67,7 +68,7 @@ fun SearchPageScreen(
         ScheduleWalkScreen(
             onSearchCompanions = goToResultScreen,
             onSearchPlaces = {
-                goToMapScreen(viewModel.getLocation(),viewModel.locationName.value)
+                goToMapScreen(viewModel.getLocation(), viewModel.locationName.value)
             },
             viewModel
         )
@@ -179,60 +180,100 @@ fun ScheduleWalkScreen(
         // Date Picker
         Text("When are you walking?", fontSize = 16.sp, fontWeight = FontWeight.Medium)
         Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-            value = date,
-            onValueChange = {},
-            placeholder = { Text("Select Date") },
-            trailingIcon = {
-                Icon(
-                    imageVector = Icons.Default.CalendarToday,
-                    contentDescription = "Date Icon",
-                    tint = Color.Gray,
-                    modifier = Modifier.clickable { datePicker.show() }
-                )
-            },
-            readOnly = true,
-            shape = RoundedCornerShape(12.dp),
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { datePicker.show() },
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                focusedBorderColor = textPurple,
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null // Remove ripple from Box
+                ) {
+                    datePicker.show()
+                }
+        ) {
+            OutlinedTextField(
+                value = date,
+                onValueChange = {},
+                placeholder = { Text("Select Date") },
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.CalendarToday,
+                        contentDescription = "Date Icon",
+                        tint = Color.Gray
+                    )
+                },
+                readOnly = true,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .fillMaxWidth(),
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
+                    focusedBorderColor = textPurple,
+                    unfocusedBorderColor = Color.Gray
+                )
             )
-        )
+
+            // Transparent clickable overlay to ensure full touch area works
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(Color.Transparent)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        datePicker.show()
+                    }
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         // Time Picker
         Text("What time should the walk begin?", fontSize = 16.sp, fontWeight = FontWeight.Medium)
         Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-            value = time,
-            onValueChange = {},
-            placeholder = { Text("Select Time") },
-            trailingIcon = {
-                Icon(
-                    imageVector = Icons.Default.AccessTime,
-                    contentDescription = "Time Icon",
-                    tint = Color.Gray,
-                    modifier = Modifier.clickable { timePicker.show() }
-                )
-            },
-            readOnly = true,
-            shape = RoundedCornerShape(12.dp),
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { timePicker.show() },
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                focusedBorderColor = textPurple,
+        ) {
+            OutlinedTextField(
+                value = time,
+                onValueChange = {},
+                placeholder = { Text("Select Time") },
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.AccessTime,
+                        contentDescription = "Time Icon",
+                        tint = Color.Gray
+                    )
+                },
+                readOnly = true,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
+                    focusedBorderColor = textPurple,
+                    unfocusedBorderColor = Color.Gray
+                )
             )
-        )
+
+            // Transparent overlay to catch clicks anywhere on the field
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(Color.Transparent)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        timePicker.show()
+                    }
+            )
+        }
+
 
         Spacer(modifier = Modifier.height(40.dp))
 

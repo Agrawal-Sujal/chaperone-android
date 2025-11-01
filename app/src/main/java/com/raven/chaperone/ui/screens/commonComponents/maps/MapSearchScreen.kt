@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -107,6 +108,8 @@ fun MapSearchScreen(
     val isLoadingLocation by viewModel.isLoadingLocation.collectAsState()
     val displayName by viewModel.displayName.collectAsState()
 
+    val isLoadingSearchResult by viewModel.isLoadingSearchResult.collectAsState()
+
     var hasLocationPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
@@ -164,7 +167,8 @@ fun MapSearchScreen(
                         searchResults = searchResults,
                         onResultClick = { lat, lon, name ->
                             viewModel.selectLocation(lat, lon, name)
-                        }
+                        },
+                        isLoadingSearchResult
                     )
                 }
             }
@@ -299,32 +303,43 @@ fun GoogleMapView(
 fun SearchResultsPanel(
     searchQuery: String,
     searchResults: List<SearchResult>,
-    onResultClick: (Double, Double, String) -> Unit
+    onResultClick: (Double, Double, String) -> Unit,
+    isLoadingSearchResult: Boolean
 ) {
     Surface(
         modifier = Modifier
             .fillMaxSize(),
         shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-
-            items(searchResults) { result ->
-                SearchResultItem(
-                    result = result,
-                    onClick = {
-                        onResultClick(
-                            result.lat.toDouble(),
-                            result.lon.toDouble(),
-                            result.display_name
-                        )
-                    }
-                )
+        if (isLoadingSearchResult) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
-        }
+        } else
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+
+                items(searchResults) { result ->
+                    SearchResultItem(
+                        result = result,
+                        onClick = {
+                            onResultClick(
+                                result.lat.toDouble(),
+                                result.lon.toDouble(),
+                                result.display_name
+                            )
+                        }
+                    )
+                }
+            }
 
     }
 }
@@ -361,6 +376,12 @@ fun SearchBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    if (!isSearching) onSearchClick()
+                }
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -374,13 +395,12 @@ fun SearchBar(
                     )
                 }
             } else {
-                IconButton(onClick = onSearchClick) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
-                        tint = Color.Black
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search",
+                    tint = Color.Black
+                )
+
             }
 
             // Search text field

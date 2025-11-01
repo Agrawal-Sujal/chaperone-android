@@ -81,72 +81,87 @@ class WalksHomeScreenViewModel @Inject constructor(
 
     fun loadUpcomingWalks() {
         viewModelScope.launch {
-            val response = parseResponse(walksServices.getWandererScheduledWalks())
-            if (response.isFailed) {
-                val errorResponse = response.error
-                val error =
-                    if (errorResponse != null)
-                        errorResponse.detail ?: "Unknown error"
-                    else
-                        "Something went wrong"
-                _uiState.value = WalksUiState.Error(
-                    error ?: "Failed to load walks"
-                )
+            try {
+                _uiState.value = WalksUiState.Loading
+                val response = parseResponse(walksServices.getWandererScheduledWalks())
+                if (response.isFailed) {
+                    val errorResponse = response.error
+                    val error =
+                        if (errorResponse != null)
+                            errorResponse.detail ?: "Unknown error"
+                        else
+                            "Something went wrong"
+                    _uiState.value = WalksUiState.Error(
+                        error ?: "Failed to load walks"
+                    )
 
-            }
-            if (response.isSuccess) {
-                val data = response.data
-                if (data != null) {
-                    _uiState.value = WalksUiState.Success(walks = data.map {
-                        Walk(
-                            name = it.walker_name,
-                            rating = it.walker_rating.toFloat(),
-                            dateTime = it.date + it.time,
-                            location = it.start_location_name,
-                            roomId = it.room_id,
-                            id = it.id,
-                            lat = it.start_location_latitude,
-                            long = it.start_location_longitude
-                        )
-                    })
-                } else
-                    _uiState.value = WalksUiState.Error("Failed to load walks")
+                }
+                if (response.isSuccess) {
+                    val data = response.data
+                    if (data != null) {
+                        _uiState.value = WalksUiState.Success(walks = data.map {
+                            Walk(
+                                name = it.walker_name,
+                                rating = it.walker_rating.toFloat(),
+                                dateTime = it.date + it.time,
+                                location = it.start_location_name,
+                                roomId = it.room_id,
+                                id = it.id,
+                                lat = it.start_location_latitude,
+                                long = it.start_location_longitude
+                            )
+                        })
+                    } else
+                        _uiState.value = WalksUiState.Error("Failed to load walks")
+                }
+            } catch (e: Exception) {
+                _uiState.value = WalksUiState.Error(
+                    e.message ?: "Failed to load data. Please try again."
+                )
             }
         }
     }
+
     fun loadCompletedWalks() {
         viewModelScope.launch {
-            val response = parseResponse(walksServices.getCompletedWandererWalks())
+            try {
+                _uiState.value = WalksUiState.Loading
+                val response = parseResponse(walksServices.getCompletedWandererWalks())
 
-            if (response.isFailed) {
-                val errorResponse = response.error
-                val error =
-                    if (errorResponse != null)
-                        errorResponse.detail ?: "Unknown error"
-                    else
-                        "Something went wrong"
+                if (response.isFailed) {
+                    val errorResponse = response.error
+                    val error =
+                        if (errorResponse != null)
+                            errorResponse.detail ?: "Unknown error"
+                        else
+                            "Something went wrong"
+                    _uiState.value = WalksUiState.Error(
+                        error ?: "Failed to load walks"
+                    )
+
+                }
+                if (response.isSuccess) {
+                    val data = response.data
+                    if (data != null) {
+                        _uiState.value = WalksUiState.Success(walks = data.map {
+                            Walk(
+                                name = it.walker_name,
+                                rating = it.walker_rating.toFloat(),
+                                dateTime = it.date + it.time,
+                                location = it.start_location_name,
+                                roomId = it.room_id,
+                                id = it.id,
+                                lat = it.start_location_latitude,
+                                long = it.start_location_longitude
+                            )
+                        })
+                    } else
+                        _uiState.value = WalksUiState.Error("Failed to load walks")
+                }
+            } catch (e: Exception) {
                 _uiState.value = WalksUiState.Error(
-                    error ?: "Failed to load walks"
+                    e.message ?: "Failed to load data. Please try again."
                 )
-
-            }
-            if (response.isSuccess) {
-                val data = response.data
-                if (data != null) {
-                    _uiState.value = WalksUiState.Success(walks = data.map {
-                        Walk(
-                            name = it.walker_name,
-                            rating = it.walker_rating.toFloat(),
-                            dateTime = it.date + it.time,
-                            location = it.start_location_name,
-                            roomId = it.room_id,
-                            id = it.id,
-                            lat = it.start_location_latitude,
-                            long = it.start_location_longitude
-                        )
-                    })
-                } else
-                    _uiState.value = WalksUiState.Error("Failed to load walks")
             }
         }
     }
@@ -194,6 +209,7 @@ class WalksHomeScreenViewModel @Inject constructor(
         when (filter) {
             WalkFilter.REQUEST_SENT -> loadRequestSentWalks()
             WalkFilter.UPCOMING -> {
+
                 loadUpcomingWalks()
             }
 

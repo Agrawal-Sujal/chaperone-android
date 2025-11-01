@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +25,7 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.raven.chaperone.ui.navigation.auth.AppNavDisplay
+import com.raven.chaperone.ui.screens.onboarding.SplashScreen
 import com.raven.chaperone.ui.theme.ChaperoneTheme
 import com.raven.chaperone.ui.theme.whiteBG
 import dagger.hilt.android.AndroidEntryPoint

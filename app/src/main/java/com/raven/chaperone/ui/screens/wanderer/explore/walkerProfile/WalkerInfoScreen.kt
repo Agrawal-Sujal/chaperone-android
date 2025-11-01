@@ -298,7 +298,7 @@ fun WalkerInfoContent(
                     contentAlignment = Alignment.Center
                 ) {
                     AsyncImage(
-                        model = "https://via.placeholder.com/150",
+                        model = "xyz",
                         contentDescription = "Profile Picture",
                         modifier = Modifier
                             .size(160.dp)
@@ -308,6 +308,7 @@ fun WalkerInfoContent(
                         placeholder = painterResource(id = android.R.drawable.ic_menu_gallery),
                         error = painterResource(id = android.R.drawable.ic_menu_gallery)
                     )
+
                 }
             }
 
@@ -515,13 +516,6 @@ fun NoFeedbacksCard() {
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = Color.Gray
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Be the first to review this walker!",
-                fontSize = 14.sp,
-                color = Color.Gray,
-                textAlign = TextAlign.Center
             )
         }
     }

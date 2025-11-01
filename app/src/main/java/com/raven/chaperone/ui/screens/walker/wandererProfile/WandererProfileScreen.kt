@@ -406,30 +406,30 @@ fun WalkerInfoContent(
                 Button(
                     onClick = onAcceptRequest,
                     modifier = Modifier
-                        .weight(1f)
-                        .height(56.dp),
+                        .weight(1f),
                     colors = ButtonDefaults.buttonColors(containerColor = textPurple),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
                         text = "Accept Request",
                         fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Button(
                     onClick = { showRejectDialog = true },
                     modifier = Modifier
-                        .weight(1f)
-                        .height(56.dp),
+                        .weight(1f),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
                         text = "Reject Request",
                         fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
                     )
                 }
             }

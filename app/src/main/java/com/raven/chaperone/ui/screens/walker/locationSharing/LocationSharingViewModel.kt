@@ -53,7 +53,8 @@ class LocationSharingViewModel @Inject constructor(
 
     private val _myLocation = MutableStateFlow<LatLng?>(null)
     val myLocation = _myLocation.asStateFlow()
-
+    private val _loading = MutableStateFlow<Boolean>(false)
+    val loading = _loading.asStateFlow()
     private val _wandererLocation = MutableStateFlow<LatLng?>(null)
     val wandererLocation = _wandererLocation.asStateFlow()
 
@@ -68,89 +69,102 @@ class LocationSharingViewModel @Inject constructor(
     fun toggleShareLocation() {
         _shareLocation.value = !_shareLocation.value
     }
+
     lateinit var roomInfo: RoomInfo
     fun loadRoom(roomId: Int) {
         viewModelScope.launch {
-            val response = parseResponse(walksServices.getRoomInfo(roomId))
+            try {
+                _loading.value = true
+                val response = parseResponse(walksServices.getRoomInfo(roomId))
 
-            if (response.isFailed) {
-                val errorResponse = response.error
-                val error =
-                    if (errorResponse != null)
-                        errorResponse.detail ?: "Unknown error"
-                    else
-                        "Something went wrong"
-                uiState = RoomUiState.Error(
-                    error ?: "Failed to load walks"
-                )
+                if (response.isFailed) {
+                    val errorResponse = response.error
+                    val error =
+                        if (errorResponse != null)
+                            errorResponse.detail ?: "Unknown error"
+                        else
+                            "Something went wrong"
+                    uiState = RoomUiState.Error(
+                        error ?: "Failed to load walks"
+                    )
 
-            }
-            if (response.isSuccess) {
-                val data = response.data
-                if (data != null) {
-                    val roomInfo = RoomInfo(
-                        roomId = roomId,
-                        wandererId = data.wanderer_id,
-                        wandererName = data.wanderer_name,
-                        walkerId = data.walker_id,
-                        walkerName = data.walker_name,
-                        startLocationName = data.start_location_name,
-                        startLocation = LatLng(
-                            data.start_location_latitude,
-                            data.start_location_longitude
+
+                }
+                if (response.isSuccess) {
+                    val data = response.data
+                    if (data != null) {
+                        val roomInfo = RoomInfo(
+                            roomId = roomId,
+                            wandererId = data.wanderer_id,
+                            wandererName = data.wanderer_name,
+                            walkerId = data.walker_id,
+                            walkerName = data.walker_name,
+                            startLocationName = data.start_location_name,
+                            startLocation = LatLng(
+                                data.start_location_latitude,
+                                data.start_location_longitude
+                            )
                         )
-                    )
-                    uiState = RoomUiState.Success(
-                        roomInfo = roomInfo
-                    )
-                    this@LocationSharingViewModel.roomInfo = roomInfo
-                    connectWebSocket(roomInfo)
-                } else
-                    uiState = RoomUiState.Error("Failed to load walks")
+                        uiState = RoomUiState.Success(
+                            roomInfo = roomInfo
+                        )
+                        this@LocationSharingViewModel.roomInfo = roomInfo
+                        connectWebSocket(roomInfo)
+                    } else
+                        uiState = RoomUiState.Error("Failed to load.")
+                }
+                _loading.value = false
+            } catch (e: Exception) {
+                uiState = RoomUiState.Error(e.message ?: "Failed to load.")
+                _loading.value = false
             }
         }
     }
 
 
     private fun connectWebSocket(roomInfo: RoomInfo) {
-        val roomName = roomInfo.roomId
-        val serverUrl = "ws://10.98.31.82:8000"
-        val uri = URI("$serverUrl/ws/location/$roomName/")
-        webSocketClient = object : WebSocketClient(uri) {
-            override fun onOpen(handshakedata: ServerHandshake?) {
-                println("Connected to WebSocket: $uri")
-            }
+        try {
+            val roomName = roomInfo.roomId
+            val serverUrl = "ws://193.181.211.55:8000"
+            val uri = URI("$serverUrl/ws/location/$roomName/")
+            webSocketClient = object : WebSocketClient(uri) {
+                override fun onOpen(handshakedata: ServerHandshake?) {
+                    println("Connected to WebSocket: $uri")
+                }
 
-            override fun onMessage(message: String?) {
-                message ?: return
-                try {
-                    val json = JSONObject(message)
-                    if (json.optString("event") == "location_update") {
-                        val userId = json.optString("user_id")
-                        val lat = json.optDouble("latitude")
-                        val lon = json.optDouble("longitude")
-                        if (userId.toInt() != roomInfo.walkerId) {
-                            viewModelScope.launch {
-                                _wandererLocation.emit(
-                                    LatLng(lat, lon)
-                                )
+                override fun onMessage(message: String?) {
+                    try {
+                        message ?: return
+                        val json = JSONObject(message)
+                        if (json.optString("event") == "location_update") {
+                            val userId = json.optString("user_id")
+                            val lat = json.optDouble("latitude")
+                            val lon = json.optDouble("longitude")
+                            if (userId.toInt() != roomInfo.walkerId) {
+                                viewModelScope.launch {
+                                    _wandererLocation.emit(
+                                        LatLng(lat, lon)
+                                    )
+                                }
                             }
                         }
+                    } catch (e: Exception) {
+
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                }
+
+                override fun onClose(code: Int, reason: String?, remote: Boolean) {
+                    println("WebSocket closed: $reason")
+                }
+
+                override fun onError(ex: Exception?) {
+
                 }
             }
+            webSocketClient?.connect()
+        } catch (e: Exception) {
 
-            override fun onClose(code: Int, reason: String?, remote: Boolean) {
-                println("WebSocket closed: $reason")
-            }
-
-            override fun onError(ex: Exception?) {
-                ex?.printStackTrace()
-            }
         }
-        webSocketClient?.connect()
     }
 
     @SuppressLint("MissingPermission")
@@ -171,16 +185,68 @@ class LocationSharingViewModel @Inject constructor(
     }
 
     private fun sendLocation(lat: Double, lon: Double) {
-        val msg = JSONObject()
-        msg.put("action", "update_location")
-        msg.put("latitude", lat)
-        msg.put("longitude", lon)
-        webSocketClient?.send(msg.toString())
+        try {
+            val msg = JSONObject()
+            msg.put("action", "update_location")
+            msg.put("latitude", lat)
+            msg.put("longitude", lon)
+            webSocketClient?.send(msg.toString())
+        } catch (e: Exception) {
+
+        }
+    }
+
+    fun completeWalk(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                _loading.value = true
+                val response = parseResponse(walksServices.completeWalk(roomInfo.roomId))
+
+                if (response.isFailed) {
+                    val errorResponse = response.error
+                    val error =
+                        if (errorResponse != null)
+                            errorResponse.detail ?: "Unknown error"
+                        else
+                            "Something went wrong"
+                    uiState = RoomUiState.Error(
+                        error ?: "Failed to load walks"
+                    )
+
+
+                }
+                if (response.isSuccess) {
+                    val data = response.data
+                    if (data != null) {
+                        _loading.value = false
+                        onDisconnect()
+                        onSuccess()
+                    } else
+                        uiState = RoomUiState.Error("Failed to load.")
+                }
+                _loading.value = false
+            } catch (e: Exception) {
+                uiState = RoomUiState.Error(e.message ?: "Failed to load.")
+                _loading.value = false
+            }
+        }
+    }
+
+    fun onDisconnect() {
+        try {
+            webSocketClient?.close()
+        } catch (e: Exception) {
+
+        }
     }
 
     override fun onCleared() {
         super.onCleared()
-        webSocketClient?.close()
+        try {
+            webSocketClient?.close()
+        } catch (e: Exception) {
+
+        }
     }
 
 }

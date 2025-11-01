@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import com.raven.chaperone.services.remote.NominatimApi
 import com.raven.chaperone.services.remote.SearchResult
+import com.raven.chaperone.ui.screens.wanderer.walks.home.WalksUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +23,7 @@ class MapSearchViewModel @Inject constructor() : ViewModel() {
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 
-    private val _displayName= MutableStateFlow<String?>(null)
+    private val _displayName = MutableStateFlow<String?>(null)
     val displayName: StateFlow<String?> = _displayName
 
     private val _searchResults = MutableStateFlow<List<SearchResult>>(emptyList())
@@ -33,6 +34,9 @@ class MapSearchViewModel @Inject constructor() : ViewModel() {
     val isSearching: StateFlow<Boolean> = _isSearching
     private val _isLoadingLocation = MutableStateFlow(false)
     val isLoadingLocation: StateFlow<Boolean> = _isLoadingLocation
+
+    private val _isLoadingSearchResult = MutableStateFlow(false)
+    val isLoadingSearchResult: StateFlow<Boolean> = _isLoadingSearchResult
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query
     }
@@ -61,7 +65,7 @@ class MapSearchViewModel @Inject constructor() : ViewModel() {
         .build()
         .create(NominatimApi::class.java)
 
-    fun selectLocation(lat: Double, lon: Double,name: String) {
+    fun selectLocation(lat: Double, lon: Double, name: String) {
         _selectedLocation.value = LatLng(lat, lon)
         _isSearching.value = false
         _displayName.value = name
@@ -84,9 +88,17 @@ class MapSearchViewModel @Inject constructor() : ViewModel() {
     fun search() {
         if (_searchQuery.value.length > 2) {
             viewModelScope.launch {
-                val result = api.searchPlaces(_searchQuery.value)
-                Log.d("Result", result.toString())
-                _searchResults.value = result
+                try {
+
+
+                    _isLoadingSearchResult.value = true
+                    val result = api.searchPlaces(_searchQuery.value)
+                    Log.d("Result", result.toString())
+                    _searchResults.value = result
+                    _isLoadingSearchResult.value = false
+                } catch (e: Exception) {
+                    _isLoadingSearchResult.value = false
+                }
             }
         }
     }

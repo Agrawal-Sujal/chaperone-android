@@ -27,6 +27,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.raven.chaperone.ui.theme.textPurple
+import kotlinx.coroutines.delay
 import java.time.format.TextStyle
 
 @Composable
@@ -58,6 +60,10 @@ fun FeedbackScreen(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
+            LaunchedEffect(key1 = true) {
+                delay(2500L) // 2.5-second splash screen
+                goBack()
+            }
             Text(
                 text = "🎉 Thank you! Feedback Submitted Successfully!",
                 style = androidx.compose.ui.text.TextStyle(

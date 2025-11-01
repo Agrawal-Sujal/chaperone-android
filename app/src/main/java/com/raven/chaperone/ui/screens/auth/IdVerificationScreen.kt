@@ -1,7 +1,13 @@
 package com.raven.chaperone.ui.screens.auth
 
+import android.app.DatePickerDialog
+import android.graphics.PorterDuff
+import android.graphics.drawable.ColorDrawable
+import android.view.View
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,10 +19,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Snackbar
@@ -25,9 +35,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -37,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.raven.chaperone.ui.theme.textPurple
 import com.raven.chaperone.ui.theme.whiteBG
+import java.util.Calendar
 
 @Composable
 fun IdVerificationScreen(
@@ -117,22 +130,72 @@ fun IdVerificationScreen(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+            val calendar = Calendar.getInstance()
+            val datePicker = DatePickerDialog(
+                context,
+                { _, year, month, day ->
+                    val newDate = "$day/${month + 1}/$year"
+                    viewModel.onDobChange(newDate)
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    value = state.dob,
+                    onValueChange = {},
+                    placeholder = { Text("DOB *") },
+                    trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = "Date Icon",
+                            tint = Color.Gray
+                        )
+                    },
+                    readOnly = true,
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = textPurple,
+                        focusedLabelColor = textPurple
+                    )
+                )
+
+                // Transparent overlay to catch clicks anywhere on the field
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(Color.Transparent)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            datePicker.show()
+                        }
+                )
+            }
 
             // DOB Input
-            OutlinedTextField(
-                value = state.dob,
-                onValueChange = { viewModel.onDobChange(it) },
-                label = { Text("DOB *") },
-                placeholder = { Text("DD/MM/YYYY") },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !state.isLoading,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = textPurple,
-                    focusedLabelColor = textPurple
-                ),
-                singleLine = true
-            )
+//            OutlinedTextField(
+//                value = state.dob,
+//                onValueChange = { viewModel.onDobChange(it) },
+//                label = { Text("DOB *") },
+//                placeholder = { Text("DD/MM/YYYY") },
+//                modifier = Modifier.fillMaxWidth(),
+//                enabled = !state.isLoading,
+//                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+//                colors = OutlinedTextFieldDefaults.colors(
+//                    focusedBorderColor = textPurple,
+//                    focusedLabelColor = textPurple
+//                ),
+//                singleLine = true
+//            )
 
             Spacer(modifier = Modifier.height(32.dp))
 

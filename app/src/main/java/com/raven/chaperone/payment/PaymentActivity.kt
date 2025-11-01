@@ -83,6 +83,8 @@ class PaymentActivity : AppCompatActivity(), PaymentResultWithDataListener {
                 } else {
                     val resultIntent = Intent()
                     resultIntent.putExtra("error", "Payment Failed")
+                    Log.d("Payment Error1", response.message().toString()+" "+response.errorBody()+" " +"Payment failed")
+
                     setResult(RESULT_CANCELED, resultIntent)
                     finish()
                 }
